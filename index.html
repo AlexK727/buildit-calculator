@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BuildIt: калькулятор</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2563eb">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BuildIt">
+<meta name="description" content="Калькулятор производства для SimCity BuildIt: раскладывает заказы на сырьё и этапы с учётом склада.">
+<meta property="og:title" content="SimCity BuildIt — калькулятор производства">
+<meta property="og:description" content="Калькулятор производства для SimCity BuildIt: раскладывает заказы на сырьё и этапы с учётом склада.">
+<meta property="og:type" content="website">
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--tx:#1a1f25;--mut:#6a7480;--ac:#2563eb;--acbg:#e8f0fe;--bd:#e2e6ea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13161a;--card:#1d2127;--tx:#e8ebef;--mut:#8f99a5;--ac:#6ea0ff;--acbg:#1f2c47;--bd:#2c323a}}
+:root[data-theme="dark"]{--bg:#13161a;--card:#1d2127;--tx:#e8ebef;--mut:#8f99a5;--ac:#6ea0ff;--acbg:#1f2c47;--bd:#2c323a}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.top{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:10px 12px 8px;z-index:2;border-bottom:1px solid var(--bd)}
+.tabs{display:flex;gap:6px}
+.tabs button{flex:1;padding:10px 4px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;font-size:15px;font-weight:600}
+.tabs button.on,.chips button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+input[type=search],#oname,.sname{width:100%;padding:10px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font:inherit}
+#q{margin-top:8px}
+main{padding:10px 12px 40px;max-width:640px;margin:0 auto}
+.add{display:block;width:100%;margin:0 0 8px;padding:10px;border:1px dashed var(--ac);border-radius:10px;background:none;color:var(--ac);font:inherit;font-weight:600}
+.sh{font-weight:700;margin:8px 0 6px;font-size:14px}
+select{padding:9px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font:inherit;font-size:14px;max-width:65%}
+.tg{color:var(--ac);font-size:12px;font-weight:600}
+.tabs button{font-size:13px;padding:10px 2px;white-space:nowrap}
+.res{display:block;width:100%;text-align:left;margin:0 0 6px;padding:8px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font:inherit}
+.res.on{border-color:var(--ac);background:var(--acbg)}
+.res .sm{display:block}
+mark{background:#ffe58a;color:#000;border-radius:3px;padding:0 2px}
+#oq{margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chips button{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:7px 12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:18px;font:inherit;font-size:14px}
+.oh{display:flex;gap:6px;align-items:center;margin-bottom:10px}
+.oh button{width:40px;height:40px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font-size:15px;padding:0;flex:none}
+.oh button:disabled{opacity:.35}
+.row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:6px 8px 6px 12px;margin-bottom:6px}
+.row.on{border-color:var(--ac);background:var(--acbg)}
+.row>span:first-child{min-width:0;padding-right:6px}
+.st{display:flex;align-items:center;gap:4px}
+.st b{min-width:26px;text-align:center}
+.st button{min-width:36px;height:38px;padding:0 3px;font-weight:600;border-radius:9px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:14px}
+.st button[data-d="-1"]{font-size:20px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.card h3{margin:0 0 6px;font-size:15px}
+.it{display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid var(--bd)}
+.it:first-of-type{border-top:0}
+.it b{color:var(--ac)}
+.it.ck{align-items:center;gap:8px;padding:8px 0}
+.it.ck i{font-style:normal;font-size:26px;line-height:1;padding:4px;cursor:pointer}
+.it.ck .nm{flex:1;min-width:0}
+.it.dn{opacity:.5}
+.it.dn .nm{text-decoration:line-through}
+.cn{display:flex;align-items:center;gap:3px}
+.cn button{width:34px;height:34px;border:1px solid var(--bd);border-radius:9px;background:var(--card);color:var(--tx);font-size:18px;padding:0}
+.cn input{width:48px;height:34px;text-align:center;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx);font:inherit;font-weight:700;padding:0;-moz-appearance:textfield}
+.cn input::-webkit-outer-spin-button,.cn input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.cn em{font-style:normal;color:var(--ac);font-weight:700;min-width:28px}
+.pg{font-weight:400;color:var(--mut);font-size:13px;margin-left:6px}
+.od{display:block;border-top:1px solid var(--bd);padding:6px 0}
+.od:first-of-type{border-top:0}
+.sm{font-size:13px;color:var(--mut)}
+.er{color:#d33;margin:-6px 0 6px;min-height:0}
+.pr{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-4px 0 10px}
+.cf{display:flex;align-items:center;gap:6px;margin:0 0 10px;padding:8px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--card)}
+.cf.wrap{flex-wrap:wrap}
+.cf>span:first-child{flex:1;font-size:14px}
+.cf>button{padding:8px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--card);color:var(--tx);font:inherit;font-size:14px}
+.cf>button.arm2,.fin.arm2{background:#d33;border-color:#d33;color:#fff}
+.fin{display:block;width:100%;margin:0 0 10px;padding:11px;border:1px solid var(--ac);border-radius:10px;background:var(--acbg);color:var(--tx);font:inherit;font-weight:600}
+.fin:disabled{opacity:.4}
+.fin.mini{display:inline-block;width:auto;margin:6px 0 0;padding:6px 10px;font-size:13px}
+textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+.ap{margin-top:8px;padding:10px 16px;border:0;border-radius:10px;background:var(--ac);color:#fff;font:inherit;font-weight:600}
+.mut{color:var(--mut);text-align:center}
+.ft{max-width:640px;margin:0 auto;padding:0 12px 30px;color:var(--mut);font-size:12px;text-align:center}
+.clr{display:block;margin:14px auto 0;background:none;border:0;color:var(--mut);font:inherit;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="tabs" id="tabs"></div>
+  <input id="q" type="search" placeholder="Поиск…">
+</div>
+<main id="main"></main>
+<footer class="ft">Неофициальный калькулятор для SimCity BuildIt, не связан с EA и Maxis. Рецепты взяты с открытой вики игры. Заказы и склад хранятся только в вашем браузере.</footer>
+<noscript><div style="padding:16px">Для работы нужен JavaScript. Открой файл в обычном браузере (Chrome, Safari, Firefox), а не в предпросмотре файлов или в мессенджере.</div></noscript>
+<script>
+window.onerror=function(m,u,l){var e=document.getElementById('main');if(e&&!e.innerHTML)e.innerHTML='<div style="padding:12px;color:#d33"><b>Страница не запустилась.</b><br>'+String(m).replace(/</g,'&lt;')+' (строка '+l+')<br><span style="color:#888">Открой файл в актуальном браузере (Chrome, Safari, Firefox) и пришли мне этот текст.</span></div>'};
+</script>
+<script>
+const R={"Металл":{},"Древесина":{},"Пластмасса":{},"Семена":{},"Минералы":{},"Химикаты":{},"Ткани":{},"Сахар и специи":{},"Стекло":{},"Корм для животных":{},"Электротехнические детали":{},"Кокос":{},
+"Гвозди":{"Металл":2},"Доски":{"Древесина":2},"Кирпичи":{"Минералы":2},"Цемент":{"Минералы":2,"Химикаты":1},"Клей":{"Пластмасса":1,"Химикаты":2},"Краска":{"Металл":2,"Минералы":1,"Химикаты":2},
+"Молоток":{"Металл":1,"Древесина":1},"Рулетка":{"Металл":1,"Пластмасса":1},"Лопата":{"Металл":1,"Древесина":1,"Пластмасса":1},"Кухонная утварь":{"Металл":2,"Пластмасса":2,"Древесина":2},"Лестница":{"Доски":2,"Металл":2},"Дрель":{"Металл":2,"Пластмасса":2,"Электротехнические детали":1},
+"Овощи":{"Семена":2},"Мешки с мукой":{"Семена":2,"Ткани":2},"Фрукты и ягоды":{"Семена":2,"Саженцы":1},"Сливки":{"Корм для животных":1},"Кукуруза":{"Минералы":1,"Семена":4},"Сыр":{"Корм для животных":2},"Говядина":{"Корм для животных":3},
+"Стулья":{"Древесина":2,"Гвозди":1,"Молоток":1},"Столы":{"Доски":1,"Гвозди":2,"Молоток":1},"Интерьерный текстиль":{"Ткани":2,"Рулетка":1},"Буфет":{"Доски":2,"Стекло":2,"Краска":1},"Кушетка":{"Ткани":3,"Дрель":1,"Клей":1},
+"Трава":{"Семена":1,"Лопата":1},"Саженцы":{"Семена":2,"Лопата":1},"Садовая мебель":{"Пластмасса":2,"Ткани":2,"Доски":2},"Костровая чаша":{"Кирпичи":2,"Цемент":2,"Лопата":1},"Газонокосилка":{"Металл":3,"Электротехнические детали":1,"Краска":1},"Садовые гномы":{"Цемент":2,"Клей":1},
+"Пончики":{"Сахар и специи":1,"Мешки с мукой":1},"Зеленый смузи":{"Овощи":1,"Фрукты и ягоды":1},"Булочка":{"Мешки с мукой":2,"Сливки":1},"Вишневый чизкейк":{"Мешки с мукой":1,"Фрукты и ягоды":1,"Сыр":1},"Замороженный йогурт":{"Сахар и специи":1,"Фрукты и ягоды":1,"Сливки":1},"Кофе":{"Семена":2,"Сахар и специи":1,"Сливки":1},
+"Кепка":{"Ткани":2,"Рулетка":1},"Обувь":{"Пластмасса":1,"Ткани":2,"Клей":1},"Часы":{"Пластмасса":2,"Химикаты":1,"Стекло":1},"Деловые костюмы":{"Ткани":3,"Клей":1,"Рулетка":1},"Рюкзак":{"Пластмасса":2,"Ткани":2,"Рулетка":1},
+"Мороженое-сэндвич":{"Сливки":1,"Булочка":1},"Пицца":{"Мешки с мукой":1,"Сыр":1,"Говядина":1},"Бургеры":{"Говядина":1,"Булочка":1,"Гриль":1},"Картофельные шарики с сыром":{"Овощи":1,"Сыр":1},"Бутылка с лимонадом":{"Сахар и специи":2,"Стекло":2,"Фрукты и ягоды":1},
+"Гриль":{"Металл":3,"Кухонная утварь":1},"Холодильник":{"Пластмасса":2,"Химикаты":2,"Электротехнические детали":2},"Осветительная система":{"Химикаты":1,"Стекло":1,"Электротехнические детали":1},"Телевизор":{"Пластмасса":2,"Стекло":2,"Электротехнические детали":2},
+"Теннисная ракетка":{"Минералы":4,"Молоток":2},"Кокосовое масло":{"Кокос":2},"Крем для лица":{"Кокосовое масло":2,"Химикаты":2},"Напиток из тропиков":{"Кокос":2,"Фрукты и ягоды":2,"Сахар и специи":1}};
+const T={"Металл":1,"Древесина":3,"Пластмасса":9,"Семена":20,"Минералы":30,"Химикаты":120,"Ткани":180,"Сахар и специи":240,"Стекло":300,"Корм для животных":360,"Электротехнические детали":420,"Кокос":6,"Гвозди":5,"Доски":30,"Кирпичи":20,"Цемент":50,"Клей":60,"Краска":60,"Молоток":14,"Рулетка":20,"Лопата":30,"Кухонная утварь":45,"Лестница":60,"Дрель":120,"Овощи":20,"Мешки с мукой":30,"Фрукты и ягоды":90,"Сливки":75,"Кукуруза":60,"Сыр":105,"Говядина":150,"Стулья":20,"Столы":30,"Интерьерный текстиль":75,"Буфет":45,"Кушетка":150,"Трава":30,"Саженцы":90,"Садовая мебель":135,"Костровая чаша":240,"Газонокосилка":120,"Садовые гномы":90,"Пончики":45,"Зеленый смузи":30,"Булочка":60,"Вишневый чизкейк":90,"Замороженный йогурт":240,"Кофе":60,"Кепка":60,"Обувь":75,"Часы":90,"Деловые костюмы":210,"Рюкзак":150,"Мороженое-сэндвич":14,"Пицца":24,"Бургеры":35,"Картофельные шарики с сыром":20,"Бутылка с лимонадом":60,"Гриль":165,"Холодильник":210,"Осветительная система":105,"Телевизор":150,"Кокосовое масло":20,"Крем для лица":90,"Напиток из тропиков":250,"Теннисная ракетка":36};
+const names=Object.keys(R), isRaw=n=>!Object.keys(R[n]).length;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cnt=o=>Object.values(o).filter(v=>v>0).length;
+const norm=s=>String(s).trim().toLowerCase();
+let S={secs:[{id:1,name:'Общее',p:1}],orders:[{id:1,name:'Заказ 1',sec:1,count:1,formed:false,items:{}}],cur:1,stock:{},done:{}};
+let tab='orders', q='', armed=0, armF=0, note='', msg='', nameErr='', dup=null, oq='', armS=0, armR=0, bk={msg:'',txt:'',in:''};
+try{
+  const s=JSON.parse(localStorage.getItem('bi')||'null');
+  if(s){
+    if(s.stock)S.stock=s.stock;
+    if(s.done)S.done=s.done;
+    if(s.secs&&s.secs.length)S.secs=s.secs;
+    if(s.orders&&s.orders.length){S.orders=s.orders;S.cur=s.cur||s.orders[0].id}
+    else if(s.need&&cnt(s.need))S.orders=[{id:1,name:'Заказ 1',items:s.need}];
+  }
+}catch(e){}
+{ // миграция и уникальные названия
+  const seen=new Set();
+  S.orders.forEach((o,i)=>{
+    if(!(o.count>=1))o.count=1;
+    if(o.formed===undefined)o.formed=cnt(o.items||{})>0;
+    o.items=o.items||{};
+    const base=(o.name||'Заказ').trim()||'Заказ'; let n=base, k=2;
+    while(seen.has(norm(n)))n=`${base} (${k++})`;
+    o.name=n; seen.add(norm(n));
+  });
+}
+S.orders.forEach(o=>{if(!S.secs.some(x=>x.id===o.sec))o.sec=S.secs[0].id});
+const save=()=>{try{localStorage.setItem('bi',JSON.stringify(S))}catch(e){}};
+const cur=()=>S.orders.find(o=>o.id===S.cur)||(S.cur=S.orders[0].id,S.orders[0]);
+const doneOf=(n,k)=>Math.min(S.done[n]||0,k);
+const fmtT=m=>m<60?Math.round(m)+' мин':(+(m/60).toFixed(1))+' ч';
+const chipLabel=o=>(o.name||'Без названия')+((o.count||1)>1?' ×'+o.count:'')+(o.formed?'':' ✎');
+const nameTaken=(v,id)=>S.orders.some(o=>o.id!==id&&norm(o.name)===norm(v));
+const uniqueName=(b,id)=>{const base=b.trim()||'Заказ'; let n=base,k=2; while(nameTaken(n,id))n=`${base} (${k++})`; return n};
+const nextName=()=>{let i=S.orders.length+1; while(nameTaken('Заказ '+i,0))i++; return 'Заказ '+i};
+const secOf=id=>S.secs.find(x=>x.id===id)||S.secs[0];
+const secP=o=>secOf(o.sec).p;
+const secTaken=(v,id)=>S.secs.some(x=>x.id!==id&&norm(x.name)===norm(v));
+const secUnique=(b,id)=>{const base=b.trim()||'Секция'; let n=base,k=2; while(secTaken(n,id))n=`${base} (${k++})`; return n};
+const secNext=()=>{let i=S.secs.length+1; while(secTaken('Секция '+i,0))i++; return 'Секция '+i};
+const secsSorted=()=>[...S.secs].sort((a,b)=>a.p-b.p||a.id-b.id);
+const sig=o=>Object.entries(o.items).filter(e=>e[1]>0).sort().map(e=>e.join(':')).join('|');
+// длительность одного заказа без учёта склада: сырьё параллельно, одинаковые композитные подряд, разные параллельно
+function dur(o){
+  const mk={};
+  const req=(n,k)=>{mk[n]=(mk[n]||0)+k; for(const [i,c] of Object.entries(R[n]))req(i,c*k)};
+  for(const [n,k] of Object.entries(o.items))if(k>0)req(n,k);
+  const memo={}, fin=n=>(n in memo)?memo[n]:(memo[n]=(T[n]||0)*(isRaw(n)?1:mk[n])+Math.max(0,...Object.keys(R[n]).map(fin)));
+  return Math.max(0,...Object.entries(o.items).filter(e=>e[1]>0).map(e=>fin(e[0])));
+}
+// порядок: сформированные вперёд, затем по приоритету секции, внутри — от коротких к длинным
+const sorted=()=>S.orders.map(o=>({o,d:dur(o)})).sort((a,b)=>(Number(b.o.formed)-Number(a.o.formed))||(secP(a.o)-secP(b.o))||(a.d-b.d)||(a.o.id-b.o.id));
+const ordered=()=>sorted().filter(x=>x.o.formed);
+
+function plan(){
+  const st={...S.stock}, make={}, used={}, per=[], pri={}, sets={}, by={};
+  ordered().forEach(({o,d})=>{
+    for(let u=0;u<(o.count||1);u++){   // одинаковые заказы идут по очереди
+      const mk={}, us={};
+      const req=(n,k)=>{
+        const t=Math.min(st[n]||0,k);
+        if(t){st[n]-=t; used[n]=(used[n]||0)+t; us[n]=(us[n]||0)+t}
+        const r=k-t; if(r<=0)return;
+        mk[n]=(mk[n]||0)+r; make[n]=(make[n]||0)+r;
+        pri[n]=Math.min(n in pri?pri[n]:1e9,secP(o)); (sets[n]||(sets[n]=new Set())).add(o.sec);
+        by[n]=by[n]||{}; by[n][o.sec]=(by[n][o.sec]||0)+r;
+        for(const [i,c] of Object.entries(R[n]))req(i,c*r);
+      };
+      for(const [n,k] of Object.entries(o.items))if(k>0)req(n,k);
+      per.push({o,mk,d,us});
+    }
+  });
+  const dc={}, d=n=>(n in dc)?dc[n]:(dc[n]=Object.keys(R[n]).length?1+Math.max(...Object.keys(R[n]).map(d)):0);
+  const g={}; for(const n in make)(g[d(n)]||(g[d(n)]=[])).push([n,make[n]]);
+  const tag={};
+  for(const n in sets){
+    const ids=[...sets[n]].sort((a,b)=>secOf(a).p-secOf(b).p||a-b);
+    tag[n]=ids.length>1?ids.map(id=>secOf(id).name+': '+by[n][id]).join(' · '):secOf(ids[0]).name;
+  }
+  return {g,used,per,meta:{pri,tag}};
+}
+
+// выполнить один заказ (из группы одинаковых — одну штуку)
+function finish(id){
+  const p=plan().per.find(x=>x.o.id===id); if(!p)return;
+  const took=[];
+  for(const [n,k] of Object.entries(p.us)){
+    const v=Math.max(0,(S.stock[n]||0)-k); if(v)S.stock[n]=v; else delete S.stock[n];
+    took.push(n+' ×'+k);
+  }
+  for(const [n,k] of Object.entries(p.mk)){
+    const v=Math.max(0,(S.done[n]||0)-k); if(v)S.done[n]=v; else delete S.done[n];
+  }
+  const o=p.o, left=(o.count||1)-1;
+  if(left>0)o.count=left; else S.orders=S.orders.filter(x=>x.id!==id);
+  if(!S.orders.length)S.orders.push({id:id+1,name:'Заказ 1',sec:S.secs[0].id,count:1,formed:false,items:{}});
+  if(!S.orders.some(x=>x.id===S.cur))S.cur=sorted()[0].o.id;
+  armF=0; armed=0;
+  note='✅ «'+o.name+'» выполнен'+(left>0?' (осталось ещё '+left+')':'')+'. Со склада списано: '+(took.join(', ')||'ничего');
+}
+
+const card=(t,a,chk,cn=true,meta)=>{
+  a.sort((x,y)=>(meta?meta.pri[x[0]]-meta.pri[y[0]]:0)||x[0].localeCompare(y[0],'ru'));
+  const dn=a.filter(([n,k])=>doneOf(n,k)>=k).length;
+  return `<div class="card"><h3>${t}${chk&&cn?`<span class="pg">${dn}/${a.length}</span>`:''}</h3>${a.map(([n,k])=>{
+    const i=names.indexOf(n), d=doneOf(n,k), full=chk&&d>=k;
+    if(!chk)return `<div class="it"><span>${n}</span><b>×${k}</b></div>`;
+    return `<div class="it ck${full?' dn':''}"><i data-c="${i}" data-k="${k}">${full?'☑':'☐'}</i><span class="nm">${n}${meta&&meta.tag[n]?`<br><small class="tg">${esc(meta.tag[n])}</small>`:''}</span><span class="cn"><button data-cd="-1" data-ci="${i}" data-k="${k}">−</button><input type="number" inputmode="numeric" min="0" max="${k}" value="${d}" data-ci="${i}" data-k="${k}"><em>/${k}</em><button data-cd="1" data-ci="${i}" data-k="${k}">+</button></span></div>`}).join('')}</div>`};
+
+const stockBox=()=>`<div class="card"><h3>Текст склада (как в stock.txt)</h3><textarea id="stx" rows="6" placeholder="Металл = 5">${Object.entries(S.stock).filter(e=>e[1]>0).map(e=>e[0]+' = '+e[1]).join('\n')}</textarea><button class="ap" data-ap="1">Применить</button><p class="mut">${msg}</p></div>`;
+const bkLast=()=>{
+  let t=''; try{t=localStorage.getItem('bi_bk')||''}catch(e){}
+  if(!t)return 'Копия ещё не делалась';
+  return 'Последняя копия: '+new Date(t).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+};
+const backupBox=()=>`<div class="card"><h3>Резервная копия</h3><div class="sm" style="margin-bottom:8px">${bkLast()}</div><button class="ap" data-bkcopy="1" style="margin:0">Скопировать данные</button>${bk.txt?`<textarea id="bktxt" rows="4" readonly style="margin-top:8px">${esc(bk.txt)}</textarea>`:''}<textarea id="rtx" rows="3" placeholder="Вставь сюда копию, чтобы восстановить" style="margin-top:12px">${esc(bk.in)}</textarea>${armR?`<div class="cf" style="margin-top:8px"><span>Заменить текущие данные?</span><button class="arm2" data-rok="1">Заменить</button><button data-cancel="1">Отмена</button></div>`:`<button class="ap" data-rest="1">Восстановить</button>`}<p class="mut">${esc(bk.msg)}</p></div>`;
+const noteBox=()=>note?`<div class="card sm">${esc(note)}</div>`:'';
+
+// «молоток 2 гвозди»: слово, после него необязательное количество
+function parseQ(t){
+  const gs=[];
+  for(const w of t.toLowerCase().split(/[\s,;]+/).filter(Boolean)){
+    if(/^\d+$/.test(w)){ if(gs.length&&gs[gs.length-1].q===undefined)gs[gs.length-1].q=+w }
+    else gs.push({t:w});
+  }
+  return gs;
+}
+const itemHit=(n,k,g)=>k>0&&n.toLowerCase().includes(g.t)&&(g.q===undefined||k===g.q);
+const matchOrder=(o,gs)=>gs.every(g=>Object.entries(o.items).some(([n,k])=>itemHit(n,k,g)));
+function ordRes(){
+  const gs=parseQ(oq), cur_=cur();
+  if(!gs.length){
+    const all=sorted();
+    return secsSorted().map(sc=>{
+      const os=all.filter(({o})=>o.sec===sc.id);
+      return `<div class="sh">${esc(sc.name)} <span class="sm">· приоритет ${sc.p}</span></div>`+(os.length?`<div class="chips">${os.map(({o})=>`<button data-oc="${o.id}" class="${o.id===cur_.id?'on':''}">${esc(chipLabel(o))}</button>`).join('')}</div>`:'<div class="sm" style="margin:0 0 10px">нет заказов</div>');
+    }).join('');
+  }
+  const hit=sorted().filter(({o})=>matchOrder(o,gs));
+  if(!hit.length)return '<div class="card sm">Заказов с таким составом нет</div>';
+  return `<div class="sm" style="margin-bottom:6px">Найдено: ${hit.length}</div>`+hit.map(({o})=>{
+    const items=Object.entries(o.items).filter(e=>e[1]>0).sort((a,b)=>a[0].localeCompare(b[0],'ru'))
+      .map(([n,k])=>{const m=gs.some(g=>itemHit(n,k,g)); return (m?'<mark>':'')+esc(n)+' ×'+k+(m?'</mark>':'')}).join(', ');
+    return `<button class="res${o.id===cur_.id?' on':''}" data-oc="${o.id}"><b>${esc(chipLabel(o))}</b> <span class="sm" style="display:inline">· ${esc(secOf(o.sec).name)}</span><span class="sm">${items}</span></button>`}).join('');
+}
+
+function render(){
+  const c=cur();
+  $tabs.innerHTML=[['orders','Заказы',S.orders.length],['secs','Секции',S.secs.length],['stock','Склад',cnt(S.stock)],['plan','План','']]
+    .map(([k,l,n])=>`<button data-t="${k}" class="${tab===k?'on':''}">${l}${n?' · '+n:''}</button>`).join('');
+  $q.style.display=(tab==='stock'||(tab==='orders'&&!c.formed))?'':'none';
+
+  if(tab==='plan'){
+    const {g,used,per,meta}=plan(), lv=Object.keys(g).map(Number).sort((a,b)=>a-b);
+    let h=noteBox();
+    const grp=new Map();
+    per.forEach(p=>{let x=grp.get(p.o.id); if(!x){x={o:p.o,d:p.d,mk:{},none:true}; grp.set(p.o.id,x)} for(const [n,k] of Object.entries(p.mk)){x.mk[n]=(x.mk[n]||0)+k; x.none=false}});
+    const drafts=S.orders.filter(o=>!o.formed&&cnt(o.items));
+    if(per.length){
+      h+=`<div class="card"><h3>📋 Заказы по порядку</h3>${[...grp.values()].map((x,i)=>{
+        const raw=Object.entries(x.mk).filter(([n])=>isRaw(n)).map(([n,k])=>`${n} ×${k}`).join(', ');
+        return `<div class="od"><b>${i+1}. ${esc(chipLabel(x.o))}</b><span class="sm"> · ${esc(secOf(x.o.sec).name)}</span> <span class="sm">⏱ ${fmtT(x.d)} · ${x.none?'✅ хватает склада':'нужно сделать'}</span>${raw?`<div class="sm">🏭 ${raw}</div>`:''}<div>${armF===x.o.id?`<button class="fin mini arm2" data-fin2="${x.o.id}">Да, выполнить</button> <button class="fin mini" data-cancel="1">Отмена</button>`:`<button class="fin mini" data-fin="${x.o.id}">Выполнить</button>`}</div></div>`}).join('')}<div class="sm" style="margin-top:6px">Склад достаётся по порядку: сначала секции с меньшим приоритетом (1 — первая), внутри — короткие заказы. Позиции в плане идут по самому высокому приоритету среди заказов, которым они нужны.</div></div>`;
+    }
+    if(drafts.length)h+=`<div class="card sm">Не сформированы и не учитываются: ${drafts.map(o=>esc(o.name)).join(', ')}</div>`;
+    h+=lv.map(l=>card(l===0?'🏭 Заводы (сырьё)':'🛠 Этап '+l,g[l],true,l>0,meta)).join('');
+    if(Object.keys(used).length)h+=card('📦 Берём со склада',Object.entries(used));
+    if(lv.length)h+='<button class="clr" data-rc="1">Сбросить галочки</button>';
+    $main.innerHTML=h||'<p class="mut">Сформируй заказ на вкладке «Заказы»</p>';
+    return;
+  }
+
+  if(tab==='secs'){
+    let h=noteBox()+`<button class="add" data-sadd="1">＋ Новая секция</button>`;
+    h+=secsSorted().map(sc=>{const n=S.orders.filter(o=>o.sec===sc.id).length;
+      return `<div class="card"><div class="oh"><input class="sname" data-sname="${sc.id}" value="${esc(sc.name)}" maxlength="30" placeholder="Название секции"><button data-sdel="${sc.id}" ${S.secs.length<2?'disabled':''}>🗑</button></div><div class="pr"><span class="sm">Приоритет (1 — самый важный)<br>Заказов: ${n}</span><span class="cn"><button data-sp="-1" data-sid="${sc.id}">−</button><input type="number" inputmode="numeric" min="1" value="${sc.p}" data-spin="${sc.id}"><button data-sp="1" data-sid="${sc.id}">+</button></span></div>${armS===sc.id?`<div class="cf wrap"><span>Удалить секцию?${n?' Заказы ('+n+') перейдут в соседнюю по приоритету.':''}</span><button class="arm2" data-sdel2="${sc.id}">Удалить</button><button data-cancel="1">Отмена</button></div>`:''}</div>`}).join('');
+    h+='<div class="sm" style="text-align:center">Заказы наследуют приоритет своей секции.</div>';
+    $main.innerHTML=h; return;
+  }
+  let h=noteBox();
+  if(tab==='orders'){
+    h+=`<button class="add" data-oadd="1">＋ Новый заказ</button>`;
+    h+=`<input id="oq" type="search" placeholder="Найти заказ по составу, напр. «молоток 2»" value="${esc(oq)}"><div id="ores">${ordRes()}</div>`;
+    h+=`<div class="oh"><input id="oname" data-oname="1" value="${esc(c.name)}" maxlength="40" placeholder="Название заказа"><button data-odel="1" ${S.orders.length<2?'disabled':''}>🗑</button></div><div class="sm er" id="nerr">${esc(nameErr)}</div>`;
+    h+=`<div class="pr"><span class="sm">Секция</span><select data-osec="1">${secsSorted().map(sc=>`<option value="${sc.id}"${sc.id===c.sec?' selected':''}>${esc(sc.name)} (приоритет ${sc.p})</option>`).join('')}</select></div>`;
+    h+=`<div class="sm" style="margin:-4px 0 10px">⏱ Длительность: ${cnt(c.items)?fmtT(dur(c)):'—'}</div>`;
+    if(armed===c.id)h+=`<div class="cf"><span>Удалить заказ?</span><button class="arm2" data-odel2="1">Удалить</button><button data-cancel="1">Отмена</button></div>`;
+    if(dup&&dup.id===c.id){
+      const t=S.orders.find(o=>o.id===dup.twin);
+      if(t)h+=`<div class="cf wrap"><span>Такой состав уже есть в заказе «${esc(t.name)}». Добавить к нему ещё ${c.count||1} шт.?</span><button class="arm2" data-dupadd="1">Добавить</button><button data-cancel="1">Отмена</button></div>`;
+    }
+    if(c.formed){
+      const items=Object.entries(c.items).filter(e=>e[1]>0).sort((a,b)=>isRaw(a[0])-isRaw(b[0])||a[0].localeCompare(b[0],'ru'));
+      h+=`<div class="card"><h3>Состав заказа${(c.count||1)>1?` · ×${c.count}`:''}</h3>${items.map(([n,k])=>`<div class="it"><span>${n}</span><b>×${k}</b></div>`).join('')}</div>`;
+      if(armF===c.id)h+=`<div class="cf"><span>Склад и галочки обновятся</span><button class="arm2" data-fin2="${c.id}">Выполнить</button><button data-cancel="1">Отмена</button></div>`;
+      else h+=`<button class="fin" data-fin="${c.id}">Выполнить заказ</button><button class="clr" data-edit="1">Изменить состав</button>`;
+      $main.innerHTML=h; return;
+    }
+    h+=`<div class="cf"><span>Одинаковых заказов</span><span class="cn"><button data-cc="-1">−</button><input type="number" inputmode="numeric" min="1" value="${c.count||1}" data-cin="1"><button data-cc="1">+</button></span></div>`;
+    h+=`<button class="fin" data-form="1" ${cnt(c.items)?'':'disabled'}>Сформировать заказ</button>`;
+  }
+  const obj=tab==='stock'?S.stock:c.items;
+  const arr=names.filter(n=>n.toLowerCase().includes(q))
+    .sort((a,b)=>(tab==='stock'?isRaw(b)-isRaw(a):isRaw(a)-isRaw(b))||a.localeCompare(b,'ru'));
+  h+=arr.map(n=>{const v=obj[n]||0,i=names.indexOf(n);
+    return `<div class="row${v?' on':''}"><span>${n}</span><span class="st"><button data-i="${i}" data-d="-1">−</button><b>${v}</b>${[1,5,10].map(d=>`<button data-i="${i}" data-d="${d}">+${d}</button>`).join('')}</span></div>`}).join('')
+    ||'<p class="mut">Ничего не найдено</p>';
+  h+=(tab==='stock'?stockBox()+backupBox():'')+`<button class="clr" data-clr="1">Очистить ${tab==='orders'?'состав':'склад'}</button>`;
+  $main.innerHTML=h;
+}
+
+const $tabs=document.getElementById('tabs'), $q=document.getElementById('q'), $main=document.getElementById('main');
+const keep=()=>{save();const y=window.scrollY;render();window.scrollTo(0,y)};
+const reset=()=>{armed=0;armF=0;armS=0;armR=0;dup=null;nameErr=''};
+$tabs.onclick=e=>{const t=e.target.dataset.t; if(t){tab=t;reset();note='';window.scrollTo(0,0);render()}};
+$q.oninput=()=>{q=$q.value.trim().toLowerCase();render()};
+$q.onfocus=()=>setTimeout(()=>$q.select(),0);
+$main.onkeydown=e=>{if(e.key==='Enter'&&e.target.id==='oq')e.target.blur()};
+$q.onkeydown=e=>{if(e.key==='Enter')$q.blur()};
+$main.onfocusin=e=>{if(e.target.tagName==='INPUT')setTimeout(()=>e.target.select(),0)};
+$main.oninput=e=>{
+  const t=e.target;
+  if(t.id==='oq'){oq=t.value; document.getElementById('ores').innerHTML=ordRes(); return}
+  if(t.dataset.oname===undefined)return;
+  const c=cur(), v=t.value, bad=v.trim()&&nameTaken(v,c.id);
+  document.getElementById('nerr').textContent=bad?'Такое название уже есть':'';
+  if(!bad&&v.trim()){
+    c.name=v; save();
+    const ch=document.querySelector('[data-oc="'+c.id+'"]');
+    if(ch)ch.textContent=chipLabel(c);
+  }
+};
+$main.onchange=e=>{
+  const t=e.target, c=cur();
+  if(t.dataset.osec!==undefined){c.sec=+t.value;keep();return}
+  if(t.dataset.sname!==undefined){
+    const sc=S.secs.find(x=>x.id===+t.dataset.sname); let v=t.value.trim();
+    const tk=v&&secTaken(v,sc.id);
+    if(!v||tk){const u=secUnique(v||'Секция',sc.id); note=tk?'«'+v+'» уже есть — назвал «'+u+'»':''; v=u} else note='';
+    sc.name=v; keep(); return;
+  }
+  if(t.dataset.spin!==undefined){const sc=S.secs.find(x=>x.id===+t.dataset.spin); sc.p=Math.max(1,parseInt(t.value,10)||1); keep(); return}
+  if(t.dataset.oname!==undefined){
+    let v=t.value.trim();
+    const taken=v&&nameTaken(v,c.id);
+    if(!v||taken){const u=uniqueName(v||'Заказ',c.id); nameErr=taken?'«'+v+'» уже есть — назвал «'+u+'»':''; v=u}
+    else nameErr='';
+    c.name=v; keep(); return;
+  }
+  if(t.dataset.cin!==undefined){c.count=Math.max(1,parseInt(t.value,10)||1);keep();return}
+  if(t.tagName!=='INPUT'||t.dataset.ci===undefined)return;
+  const n=names[+t.dataset.ci], k=+t.dataset.k;
+  S.done[n]=Math.max(0,Math.min(k,parseInt(t.value,10)||0));
+  keep();
+};
+$main.onclick=e=>{
+  const g=a=>e.target.closest('['+a+']'); let x; const c=cur();
+  if(x=g('data-oc')){S.cur=+x.dataset.oc;reset();keep();return}
+  if(g('data-oadd')){
+    const id=Math.max(0,...S.orders.map(o=>o.id))+1;
+    S.orders.push({id,name:nextName(),sec:c.sec,count:1,formed:false,items:{}}); S.cur=id; reset(); keep(); return;
+  }
+  if(g('data-sadd')){
+    const id=Math.max(0,...S.secs.map(v=>v.id))+1;
+    S.secs.push({id,name:secNext(),p:Math.max(...S.secs.map(v=>v.p))+1}); reset(); note=''; keep(); return;
+  }
+  if(x=g('data-sp')){const sc=S.secs.find(v=>v.id===+x.dataset.sid); sc.p=Math.max(1,sc.p+ +x.dataset.sp); keep(); return}
+  if(x=g('data-sdel')){if(S.secs.length>1){armS=+x.dataset.sdel;armed=0;armF=0;render()}return}
+  if(x=g('data-sdel2')){
+    const id=+x.dataset.sdel2; if(S.secs.length<2)return;
+    const t=S.secs.filter(v=>v.id!==id).sort((a,b)=>a.p-b.p||a.id-b.id)[0];
+    const moved=S.orders.filter(o=>o.sec===id); moved.forEach(o=>o.sec=t.id);
+    S.secs=S.secs.filter(v=>v.id!==id); reset();
+    note='Секция удалена'+(moved.length?'. Заказы ('+moved.length+') перенесены в «'+t.name+'»':''); keep(); return;
+  }
+  if(g('data-bkcopy')){
+    const txt=localStorage.getItem('bi')||JSON.stringify(S);
+    try{localStorage.setItem('bi_bk',new Date().toISOString())}catch(e){}
+    const done=m=>{bk.msg=m; render()};
+    bk.txt='';
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(()=>done('Скопировано в буфер обмена'),()=>{bk.txt=txt;done('Не удалось скопировать сам — выдели текст ниже и скопируй')});
+    else{bk.txt=txt;done('Выдели текст ниже и скопируй')}
+    return;
+  }
+  if(g('data-rest')){
+    bk.in=document.getElementById('rtx').value.trim();
+    let ok=false; try{const o=JSON.parse(bk.in); ok=!!(o&&typeof o==='object'&&(Array.isArray(o.orders)||o.need))}catch(e){}
+    if(!ok){bk.msg='Это не похоже на копию данных';render();return}
+    armR=1; bk.msg=''; render(); return;
+  }
+  if(g('data-rok')){try{localStorage.setItem('bi',bk.in)}catch(e){} location.reload(); return}
+  if(g('data-cancel')){reset();render();return}
+  if(x=g('data-cc')){c.count=Math.max(1,(c.count||1)+ +x.dataset.cc); keep(); return}
+  if(g('data-form')){
+    if(!cnt(c.items))return;
+    const twin=S.orders.find(o=>o.id!==c.id&&o.formed&&sig(o)===sig(c));
+    if(twin){dup={id:c.id,twin:twin.id};render();return}
+    c.formed=true; reset(); keep(); return;
+  }
+  if(g('data-dupadd')){
+    const t=S.orders.find(o=>o.id===(dup&&dup.twin)); if(!t)return;
+    t.count=(t.count||1)+(c.count||1);
+    S.orders=S.orders.filter(o=>o.id!==c.id); S.cur=t.id; reset();
+    note='Добавлено к «'+t.name+'»: теперь ×'+t.count; keep(); return;
+  }
+  if(g('data-edit')){c.formed=false; reset(); keep(); return}
+  if(x=g('data-fin')){armF=+x.dataset.fin;armed=0;render();return}
+  if(x=g('data-fin2')){finish(+x.dataset.fin2);keep();return}
+  if(g('data-odel')){if(S.orders.length>1){armed=S.cur;armF=0;render()}return}
+  if(g('data-odel2')){
+    if(S.orders.length<2)return;
+    S.orders=S.orders.filter(o=>o.id!==S.cur); S.cur=sorted()[0].o.id; reset(); keep(); return;
+  }
+  if(g('data-ap')){
+    const ns={},bad=[];
+    document.getElementById('stx').value.split('\n').forEach(l=>{
+      l=l.split('#')[0].trim(); if(!l)return;
+      const p=l.lastIndexOf('='), n=(p<0?l:l.slice(0,p)).trim(), k=p<0?1:parseInt(l.slice(p+1),10);
+      if(!(n in R)||!(k>0))bad.push(n||l); else ns[n]=(ns[n]||0)+k;
+    });
+    S.stock=ns; msg=bad.length?'Не распознано: '+bad.join(', '):'Склад обновлён'; keep(); return;
+  }
+  if(g('data-clr')){if(tab==='stock')S.stock={}; else c.items={}; keep(); return}
+  if(g('data-rc')){S.done={};keep();return}
+  if(x=g('data-c')){
+    const n=names[+x.dataset.c], k=+x.dataset.k;
+    if(doneOf(n,k)>=k)delete S.done[n]; else S.done[n]=k;
+    keep(); return;
+  }
+  if(x=g('data-cd')){
+    const n=names[+x.dataset.ci], k=+x.dataset.k;
+    S.done[n]=Math.max(0,Math.min(k,doneOf(n,k)+ +x.dataset.cd)); keep(); return;
+  }
+  if(x=g('data-i')){
+    const o=tab==='stock'?S.stock:c.items, n=names[+x.dataset.i];
+    o[n]=Math.max(0,(o[n]||0)+ +x.dataset.d); keep();
+  }
+};
+render();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+</script>
+<script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+</body>
+</html>
