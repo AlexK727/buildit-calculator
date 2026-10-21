@@ -4,12 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BuildIt: калькулятор</title>
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#2563eb">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="BuildIt">
 <meta name="description" content="Калькулятор производства для SimCity BuildIt: раскладывает заказы на сырьё и этапы с учётом склада.">
 <meta property="og:title" content="SimCity BuildIt — калькулятор производства">
 <meta property="og:description" content="Калькулятор производства для SimCity BuildIt: раскладывает заказы на сырьё и этапы с учётом склада.">
@@ -42,6 +36,8 @@ mark{background:#ffe58a;color:#000;border-radius:3px;padding:0 2px}
 .oh{display:flex;gap:6px;align-items:center;margin-bottom:10px}
 .oh button{width:40px;height:40px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font-size:15px;padding:0;flex:none}
 .oh button:disabled{opacity:.35}
+#undo,#redo{width:40px;height:40px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font-size:18px;flex:none}
+#undo:disabled,#redo:disabled{opacity:.3}
 .row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:6px 8px 6px 12px;margin-bottom:6px}
 .row.on{border-color:var(--ac);background:var(--acbg)}
 .row>span:first-child{min-width:0;padding-right:6px}
@@ -61,6 +57,8 @@ mark{background:#ffe58a;color:#000;border-radius:3px;padding:0 2px}
 .it.dn .nm{text-decoration:line-through}
 .cn{display:flex;align-items:center;gap:3px}
 .cn button{width:34px;height:34px;border:1px solid var(--bd);border-radius:9px;background:var(--card);color:var(--tx);font-size:18px;padding:0}
+.cn button[data-kind]{width:auto;padding:8px 10px;font-size:13px;font-weight:600}
+.cn button[data-kind].on{background:var(--ac);border-color:var(--ac);color:#fff}
 .cn input{width:48px;height:34px;text-align:center;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx);font:inherit;font-weight:700;padding:0;-moz-appearance:textfield}
 .cn input::-webkit-outer-spin-button,.cn input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .cn em{font-style:normal;color:var(--ac);font-weight:700;min-width:28px}
@@ -87,7 +85,7 @@ textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;b
 </head>
 <body>
 <div class="top">
-  <div class="tabs" id="tabs"></div>
+  <div style="display:flex;gap:6px;align-items:center"><div class="tabs" id="tabs"></div><button id="undo" title="Отменить">↶</button><button id="redo" title="Повторить">↷</button></div>
   <input id="q" type="search" placeholder="Поиск…">
 </div>
 <main id="main"></main>
@@ -113,8 +111,9 @@ const names=Object.keys(R), isRaw=n=>!Object.keys(R[n]).length;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cnt=o=>Object.values(o).filter(v=>v>0).length;
 const norm=s=>String(s).trim().toLowerCase();
-let S={secs:[{id:1,name:'Общее',p:1}],orders:[{id:1,name:'Заказ 1',sec:1,count:1,formed:false,items:{}}],cur:1,stock:{},done:{}};
-let tab='orders', q='', armed=0, armF=0, note='', msg='', nameErr='', dup=null, oq='', armS=0, armR=0, bk={msg:'',txt:'',in:''};
+let S={secs:[{id:1,name:'Общее',p:1}],orders:[{id:1,name:'Заказ 1',sec:1,count:1,formed:false,kind:'out',items:{}}],cur:1,stock:{},done:{}};
+let hist=[], histAt=-1, histLock=false;
+let tab='orders', q='', armed=0, armF=0, note='', msg='', nameErr='', dup=null, oq='', armS=0, armR=0, armRC=0, bk={msg:'',txt:'',in:''};
 try{
   const s=JSON.parse(localStorage.getItem('bi')||'null');
   if(s){
@@ -137,14 +136,27 @@ try{
   });
 }
 S.orders.forEach(o=>{if(!S.secs.some(x=>x.id===o.sec))o.sec=S.secs[0].id});
-const save=()=>{try{localStorage.setItem('bi',JSON.stringify(S))}catch(e){}};
+function save(){
+  try{localStorage.setItem('bi',JSON.stringify(S))}catch(e){}
+  if(histLock)return;
+  const snap=JSON.stringify(S);
+  if(hist[histAt]===snap)return;
+  hist=hist.slice(0,histAt+1); hist.push(snap);
+  if(hist.length>50)hist.shift(); else histAt++;
+}
+function jump(d){
+  const i=histAt+d; if(i<0||i>=hist.length)return;
+  histAt=i; histLock=true; S=JSON.parse(hist[i]); histLock=false;
+  try{localStorage.setItem('bi',JSON.stringify(S))}catch(e){}
+  reset(); const y=window.scrollY; render(); window.scrollTo(0,y);
+}
 const cur=()=>S.orders.find(o=>o.id===S.cur)||(S.cur=S.orders[0].id,S.orders[0]);
 const doneOf=(n,k)=>Math.min(S.done[n]||0,k);
 const fmtT=m=>m<60?Math.round(m)+' мин':(+(m/60).toFixed(1))+' ч';
-const chipLabel=o=>(o.name||'Без названия')+((o.count||1)>1?' ×'+o.count:'')+(o.formed?'':' ✎');
+const chipLabel=o=>(o.kind==='in'?'📥 ':'')+(o.name||'Без названия')+((o.count||1)>1?' ×'+o.count:'')+(o.formed?'':' ✎');
 const nameTaken=(v,id)=>S.orders.some(o=>o.id!==id&&norm(o.name)===norm(v));
 const uniqueName=(b,id)=>{const base=b.trim()||'Заказ'; let n=base,k=2; while(nameTaken(n,id))n=`${base} (${k++})`; return n};
-const nextName=()=>{let i=S.orders.length+1; while(nameTaken('Заказ '+i,0))i++; return 'Заказ '+i};
+const nextName=()=>{let i=1; while(nameTaken('Заказ '+i,0))i++; return 'Заказ '+i};
 const secOf=id=>S.secs.find(x=>x.id===id)||S.secs[0];
 const secP=o=>secOf(o.sec).p;
 const secTaken=(v,id)=>S.secs.some(x=>x.id!==id&&norm(x.name)===norm(v));
@@ -194,21 +206,30 @@ function plan(){
 
 // выполнить один заказ (из группы одинаковых — одну штуку)
 function finish(id){
-  const p=plan().per.find(x=>x.o.id===id); if(!p)return;
-  const took=[];
-  for(const [n,k] of Object.entries(p.us)){
-    const v=Math.max(0,(S.stock[n]||0)-k); if(v)S.stock[n]=v; else delete S.stock[n];
-    took.push(n+' ×'+k);
+  const o=S.orders.find(x=>x.id===id); if(!o)return;
+  const left=(o.count||1)-1;
+  if(o.kind==='in'){
+    const added=[];
+    for(const [n,k] of Object.entries(o.items)){
+      if(k>0){S.stock[n]=(S.stock[n]||0)+k; added.push(n+' ×'+k)}
+    }
+    note='✅ «'+o.name+'» получен'+(left>0?' (осталось ещё '+left+')':'')+'. На склад добавлено: '+(added.join(', ')||'ничего');
+  }else{
+    const p=plan().per.find(x=>x.o.id===id); if(!p)return;
+    const took=[];
+    for(const [n,k] of Object.entries(p.us)){
+      const v=Math.max(0,(S.stock[n]||0)-k); if(v)S.stock[n]=v; else delete S.stock[n];
+      took.push(n+' ×'+k);
+    }
+    for(const [n,k] of Object.entries(p.mk)){
+      const v=Math.max(0,(S.done[n]||0)-k); if(v)S.done[n]=v; else delete S.done[n];
+    }
+    note='✅ «'+o.name+'» выполнен'+(left>0?' (осталось ещё '+left+')':'')+'. Со склада списано: '+(took.join(', ')||'ничего');
   }
-  for(const [n,k] of Object.entries(p.mk)){
-    const v=Math.max(0,(S.done[n]||0)-k); if(v)S.done[n]=v; else delete S.done[n];
-  }
-  const o=p.o, left=(o.count||1)-1;
   if(left>0)o.count=left; else S.orders=S.orders.filter(x=>x.id!==id);
-  if(!S.orders.length)S.orders.push({id:id+1,name:'Заказ 1',sec:S.secs[0].id,count:1,formed:false,items:{}});
+  if(!S.orders.length)S.orders.push({id:id+1,name:'Заказ 1',sec:S.secs[0].id,count:1,formed:false,kind:'out',items:{}});
   if(!S.orders.some(x=>x.id===S.cur))S.cur=sorted()[0].o.id;
   armF=0; armed=0;
-  note='✅ «'+o.name+'» выполнен'+(left>0?' (осталось ещё '+left+')':'')+'. Со склада списано: '+(took.join(', ')||'ничего');
 }
 
 const card=(t,a,chk,cn=true,meta)=>{
@@ -257,6 +278,7 @@ function ordRes(){
 }
 
 function render(){
+  syncHist();
   const c=cur();
   $tabs.innerHTML=[['orders','Заказы',S.orders.length],['secs','Секции',S.secs.length],['stock','Склад',cnt(S.stock)],['plan','План','']]
     .map(([k,l,n])=>`<button data-t="${k}" class="${tab===k?'on':''}">${l}${n?' · '+n:''}</button>`).join('');
@@ -269,14 +291,17 @@ function render(){
     per.forEach(p=>{let x=grp.get(p.o.id); if(!x){x={o:p.o,d:p.d,mk:{},none:true}; grp.set(p.o.id,x)} for(const [n,k] of Object.entries(p.mk)){x.mk[n]=(x.mk[n]||0)+k; x.none=false}});
     const drafts=S.orders.filter(o=>!o.formed&&cnt(o.items));
     if(per.length){
-      h+=`<div class="card"><h3>📋 Заказы по порядку</h3>${[...grp.values()].map((x,i)=>{
+      h+=`<div class="card"><h3>📋 Заказы</h3>${[...grp.values()].map(x=>{
         const raw=Object.entries(x.mk).filter(([n])=>isRaw(n)).map(([n,k])=>`${n} ×${k}`).join(', ');
-        return `<div class="od"><b>${i+1}. ${esc(chipLabel(x.o))}</b><span class="sm"> · ${esc(secOf(x.o.sec).name)}</span> <span class="sm">⏱ ${fmtT(x.d)} · ${x.none?'✅ хватает склада':'нужно сделать'}</span>${raw?`<div class="sm">🏭 ${raw}</div>`:''}<div>${armF===x.o.id?`<button class="fin mini arm2" data-fin2="${x.o.id}">Да, выполнить</button> <button class="fin mini" data-cancel="1">Отмена</button>`:`<button class="fin mini" data-fin="${x.o.id}">Выполнить</button>`}</div></div>`}).join('')}<div class="sm" style="margin-top:6px">Склад достаётся по порядку: сначала секции с меньшим приоритетом (1 — первая), внутри — короткие заказы. Позиции в плане идут по самому высокому приоритету среди заказов, которым они нужны.</div></div>`;
+        return `<div class="od"><b>${esc(chipLabel(x.o))}</b><span class="sm"> · ${esc(secOf(x.o.sec).name)}</span> <span class="sm">${x.o.kind==='in'?'поступление':(x.none?'✅ хватает склада':'нужно сделать')}</span>${raw?`<div class="sm">🏭 ${raw}</div>`:''}<div>${armF===x.o.id?`<button class="fin mini arm2" data-fin2="${x.o.id}">Да, выполнить</button> <button class="fin mini" data-cancel="1">Отмена</button>`:`<button class="fin mini" data-fin="${x.o.id}">Выполнить</button>`}</div></div>`}).join('')}</div>`;
     }
     if(drafts.length)h+=`<div class="card sm">Не сформированы и не учитываются: ${drafts.map(o=>esc(o.name)).join(', ')}</div>`;
     h+=lv.map(l=>card(l===0?'🏭 Заводы (сырьё)':'🛠 Этап '+l,g[l],true,l>0,meta)).join('');
     if(Object.keys(used).length)h+=card('📦 Берём со склада',Object.entries(used));
-    if(lv.length)h+='<button class="clr" data-rc="1">Сбросить галочки</button>';
+    if(lv.length){
+      if(armRC)h+='<div class="cf"><span>Сбросить весь прогресс?</span><button class="arm2" data-rc2="1">Сбросить</button><button data-cancel="1">Отмена</button></div>';
+      else h+='<button class="clr" data-rc="1">Сбросить галочки</button>';
+    }
     $main.innerHTML=h||'<p class="mut">Сформируй заказ на вкладке «Заказы»</p>';
     return;
   }
@@ -284,7 +309,7 @@ function render(){
   if(tab==='secs'){
     let h=noteBox()+`<button class="add" data-sadd="1">＋ Новая секция</button>`;
     h+=secsSorted().map(sc=>{const n=S.orders.filter(o=>o.sec===sc.id).length;
-      return `<div class="card"><div class="oh"><input class="sname" data-sname="${sc.id}" value="${esc(sc.name)}" maxlength="30" placeholder="Название секции"><button data-sdel="${sc.id}" ${S.secs.length<2?'disabled':''}>🗑</button></div><div class="pr"><span class="sm">Приоритет (1 — самый важный)<br>Заказов: ${n}</span><span class="cn"><button data-sp="-1" data-sid="${sc.id}">−</button><input type="number" inputmode="numeric" min="1" value="${sc.p}" data-spin="${sc.id}"><button data-sp="1" data-sid="${sc.id}">+</button></span></div>${armS===sc.id?`<div class="cf wrap"><span>Удалить секцию?${n?' Заказы ('+n+') перейдут в соседнюю по приоритету.':''}</span><button class="arm2" data-sdel2="${sc.id}">Удалить</button><button data-cancel="1">Отмена</button></div>`:''}</div>`}).join('');
+      return `<div class="card"><div class="oh"><input class="sname" data-sname="${sc.id}" value="${esc(sc.name)}" maxlength="30" placeholder="Название секции"><button data-sdel="${sc.id}" ${S.secs.length<2?'disabled':''}>🗑</button></div><div class="pr"><span class="sm">Приоритет (1 — самый важный)<br>Заказов: ${n}</span><span class="cn"><button data-sp="-1" data-sid="${sc.id}">−</button><input type="number" inputmode="numeric" min="1" value="${sc.p}" data-spin="${sc.id}"><button data-sp="1" data-sid="${sc.id}">+</button></span></div>${armS===sc.id?`<div class="cf wrap"><span>Удалить секцию?${n?' Вместе с ней будут удалены заказы в ней ('+n+').':''}</span><button class="arm2" data-sdel2="${sc.id}">Удалить</button><button data-cancel="1">Отмена</button></div>`:''}</div>`}).join('');
     h+='<div class="sm" style="text-align:center">Заказы наследуют приоритет своей секции.</div>';
     $main.innerHTML=h; return;
   }
@@ -293,8 +318,10 @@ function render(){
     h+=`<button class="add" data-oadd="1">＋ Новый заказ</button>`;
     h+=`<input id="oq" type="search" placeholder="Найти заказ по составу, напр. «молоток 2»" value="${esc(oq)}"><div id="ores">${ordRes()}</div>`;
     h+=`<div class="oh"><input id="oname" data-oname="1" value="${esc(c.name)}" maxlength="40" placeholder="Название заказа"><button data-odel="1" ${S.orders.length<2?'disabled':''}>🗑</button></div><div class="sm er" id="nerr">${esc(nameErr)}</div>`;
+    h+=`<div class="pr"><span class="sm">Тип</span><span class="cn"><button data-kind="out" class="${(c.kind||'out')==='out'?'on':''}">📤 Расход</button><button data-kind="in" class="${c.kind==='in'?'on':''}">📥 Поступление</button></span></div>`;
     h+=`<div class="pr"><span class="sm">Секция</span><select data-osec="1">${secsSorted().map(sc=>`<option value="${sc.id}"${sc.id===c.sec?' selected':''}>${esc(sc.name)} (приоритет ${sc.p})</option>`).join('')}</select></div>`;
-    h+=`<div class="sm" style="margin:-4px 0 10px">⏱ Длительность: ${cnt(c.items)?fmtT(dur(c)):'—'}</div>`;
+    if(c.kind!=='in')h+=`<div class="sm" style="margin:-4px 0 10px">⏱ Длительность: ${cnt(c.items)?fmtT(dur(c)):'—'}</div>`;
+    else h+=`<div class="sm" style="margin:-4px 0 10px">Эти товары добавятся на склад при выполнении, без производства.</div>`;
     if(armed===c.id)h+=`<div class="cf"><span>Удалить заказ?</span><button class="arm2" data-odel2="1">Удалить</button><button data-cancel="1">Отмена</button></div>`;
     if(dup&&dup.id===c.id){
       const t=S.orders.find(o=>o.id===dup.twin);
@@ -321,8 +348,11 @@ function render(){
 }
 
 const $tabs=document.getElementById('tabs'), $q=document.getElementById('q'), $main=document.getElementById('main');
+const $undo=document.getElementById('undo'), $redo=document.getElementById('redo');
+$undo.onclick=()=>jump(-1); $redo.onclick=()=>jump(1);
+const syncHist=()=>{$undo.disabled=histAt<=0; $redo.disabled=histAt>=hist.length-1};
 const keep=()=>{save();const y=window.scrollY;render();window.scrollTo(0,y)};
-const reset=()=>{armed=0;armF=0;armS=0;armR=0;dup=null;nameErr=''};
+const reset=()=>{armed=0;armF=0;armS=0;armR=0;armRC=0;dup=null;nameErr=''};
 $tabs.onclick=e=>{const t=e.target.dataset.t; if(t){tab=t;reset();note='';window.scrollTo(0,0);render()}};
 $q.oninput=()=>{q=$q.value.trim().toLowerCase();render()};
 $q.onfocus=()=>setTimeout(()=>$q.select(),0);
@@ -379,10 +409,13 @@ $main.onclick=e=>{
   if(x=g('data-sdel')){if(S.secs.length>1){armS=+x.dataset.sdel;armed=0;armF=0;render()}return}
   if(x=g('data-sdel2')){
     const id=+x.dataset.sdel2; if(S.secs.length<2)return;
-    const t=S.secs.filter(v=>v.id!==id).sort((a,b)=>a.p-b.p||a.id-b.id)[0];
-    const moved=S.orders.filter(o=>o.sec===id); moved.forEach(o=>o.sec=t.id);
-    S.secs=S.secs.filter(v=>v.id!==id); reset();
-    note='Секция удалена'+(moved.length?'. Заказы ('+moved.length+') перенесены в «'+t.name+'»':''); keep(); return;
+    const removed=S.orders.filter(o=>o.sec===id).length;
+    S.orders=S.orders.filter(o=>o.sec!==id);
+    S.secs=S.secs.filter(v=>v.id!==id);
+    if(!S.orders.length)S.orders.push({id:Math.max(0,...S.orders.map(x=>x.id),0)+1,name:nextName(),sec:S.secs[0].id,count:1,formed:false,kind:'out',items:{}});
+    if(!S.orders.some(o=>o.id===S.cur))S.cur=S.orders[0].id;
+    reset();
+    note='Секция удалена'+(removed?'. Заказы в ней ('+removed+') тоже удалены':''); keep(); return;
   }
   if(g('data-bkcopy')){
     const txt=localStorage.getItem('bi')||JSON.stringify(S);
@@ -400,6 +433,7 @@ $main.onclick=e=>{
     armR=1; bk.msg=''; render(); return;
   }
   if(g('data-rok')){try{localStorage.setItem('bi',bk.in)}catch(e){} location.reload(); return}
+  if(x=g('data-kind')){c.kind=x.dataset.kind; keep(); return}
   if(g('data-cancel')){reset();render();return}
   if(x=g('data-cc')){c.count=Math.max(1,(c.count||1)+ +x.dataset.cc); keep(); return}
   if(g('data-form')){
@@ -432,7 +466,8 @@ $main.onclick=e=>{
     S.stock=ns; msg=bad.length?'Не распознано: '+bad.join(', '):'Склад обновлён'; keep(); return;
   }
   if(g('data-clr')){if(tab==='stock')S.stock={}; else c.items={}; keep(); return}
-  if(g('data-rc')){S.done={};keep();return}
+  if(g('data-rc')){armRC=1;render();return}
+  if(g('data-rc2')){S.done={};reset();keep();return}
   if(x=g('data-c')){
     const n=names[+x.dataset.c], k=+x.dataset.k;
     if(doneOf(n,k)>=k)delete S.done[n]; else S.done[n]=k;
@@ -447,9 +482,9 @@ $main.onclick=e=>{
     o[n]=Math.max(0,(o[n]||0)+ +x.dataset.d); keep();
   }
 };
+hist=[JSON.stringify(S)]; histAt=0;
 render();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 </script>
-<script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(function(){});</script>
 </body>
 </html>
