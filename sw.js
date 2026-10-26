@@ -1,7 +1,7 @@
 // Сервис-воркер: страница работает без интернета.
 // Открывается из кэша сразу, а свежая версия подгружается в фоне (появится при следующем запуске).
-const V = 'buildit-1';
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const V = 'buildit-2';
+const FILES = ['./', './index.html', './special.json', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
