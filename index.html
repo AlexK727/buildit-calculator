@@ -70,6 +70,7 @@ mark{background:#ffe58a;color:#000;border-radius:3px;padding:0 2px}
 .sm{font-size:13px;color:var(--mut)}
 .er{color:#d33;margin:-6px 0 6px;min-height:0}
 .pr{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-4px 0 10px}
+.pr .cn{flex-wrap:wrap;justify-content:flex-end}
 .cf{display:flex;align-items:center;gap:6px;margin:0 0 10px;padding:8px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--card)}
 .cf.wrap{flex-wrap:wrap}
 .cf>span:first-child{flex:1;font-size:14px}
@@ -87,8 +88,8 @@ textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;b
 </head>
 <body>
 <div class="top">
-  <div style="display:flex;gap:6px;align-items:center"><div class="tabs" id="tabs"></div><button id="undo" title="Отменить">↶</button><button id="redo" title="Повторить">↷</button></div>
-  <input id="q" type="search" placeholder="Поиск…">
+<div style="display:flex;gap:6px;align-items:center"><div class="tabs" id="tabs"></div><button id="undo" title="Отменить">↶</button><button id="redo" title="Повторить">↷</button></div>
+<input id="q" type="search" placeholder="Поиск…">
 </div>
 <main id="main"></main>
 <footer class="ft">Неофициальный калькулятор для SimCity BuildIt, не связан с EA и Maxis. Рецепты взяты с открытой вики игры. Заказы и склад хранятся только в вашем браузере.</footer>
@@ -98,59 +99,60 @@ window.onerror=function(m,u,l){var e=document.getElementById('main');if(e&&!e.in
 </script>
 <script>
 const FALLBACK={"Металл":{"р":{},"т":1,"з":"Завод"},"Древесина":{"р":{},"т":3,"з":"Завод"},"Пластмасса":{"р":{},"т":9,"з":"Завод"},"Семена":{"р":{},"т":20,"з":"Завод"},"Минералы":{"р":{},"т":30,"з":"Завод"},"Химикаты":{"р":{},"т":120,"з":"Завод"},"Ткани":{"р":{},"т":180,"з":"Завод"},"Сахар и специи":{"р":{},"т":240,"з":"Завод"},"Стекло":{"р":{},"т":300,"з":"Завод"},"Корм для животных":{"р":{},"т":360,"з":"Завод"},"Электротехнические детали":{"р":{},"т":420,"з":"Завод"},"Кокос":{"р":{},"т":6,"з":"Завод"},"Гвозди":{"р":{"Металл":2},"т":5,"з":"Склад стройматериалов"},"Доски":{"р":{"Древесина":2},"т":30,"з":"Склад стройматериалов"},"Кирпичи":{"р":{"Минералы":2},"т":20,"з":"Склад стройматериалов"},"Цемент":{"р":{"Минералы":2,"Химикаты":1},"т":50,"з":"Склад стройматериалов"},"Клей":{"р":{"Пластмасса":1,"Химикаты":2},"т":60,"з":"Склад стройматериалов"},"Краска":{"р":{"Металл":2,"Минералы":1,"Химикаты":2},"т":60,"з":"Склад стройматериалов"},"Молоток":{"р":{"Металл":1,"Древесина":1},"т":14,"з":"Хозяйственный магазин"},"Рулетка":{"р":{"Металл":1,"Пластмасса":1},"т":20,"з":"Хозяйственный магазин"},"Лопата":{"р":{"Металл":1,"Древесина":1,"Пластмасса":1},"т":30,"з":"Хозяйственный магазин"},"Кухонная утварь":{"р":{"Металл":2,"Пластмасса":2,"Древесина":2},"т":45,"з":"Хозяйственный магазин"},"Лестница":{"р":{"Доски":2,"Металл":2},"т":60,"з":"Хозяйственный магазин"},"Дрель":{"р":{"Металл":2,"Пластмасса":2,"Электротехнические детали":1},"т":120,"з":"Хозяйственный магазин"},"Овощи":{"р":{"Семена":2},"т":20,"з":"Фермерский рынок"},"Мешки с мукой":{"р":{"Семена":2,"Ткани":2},"т":30,"з":"Фермерский рынок"},"Фрукты и ягоды":{"р":{"Семена":2,"Саженцы":1},"т":90,"з":"Фермерский рынок"},"Сливки":{"р":{"Корм для животных":1},"т":75,"з":"Фермерский рынок"},"Кукуруза":{"р":{"Минералы":1,"Семена":4},"т":60,"з":"Фермерский рынок"},"Сыр":{"р":{"Корм для животных":2},"т":105,"з":"Фермерский рынок"},"Говядина":{"р":{"Корм для животных":3},"т":150,"з":"Фермерский рынок"},"Стулья":{"р":{"Древесина":2,"Гвозди":1,"Молоток":1},"т":20,"з":"Мебельный магазин"},"Столы":{"р":{"Доски":1,"Гвозди":2,"Молоток":1},"т":30,"з":"Мебельный магазин"},"Интерьерный текстиль":{"р":{"Ткани":2,"Рулетка":1},"т":75,"з":"Мебельный магазин"},"Буфет":{"р":{"Доски":2,"Стекло":2,"Краска":1},"т":45,"з":"Мебельный магазин"},"Кушетка":{"р":{"Ткани":3,"Дрель":1,"Клей":1},"т":150,"з":"Мебельный магазин"},"Трава":{"р":{"Семена":1,"Лопата":1},"т":30,"з":"Садоводческий магазин"},"Саженцы":{"р":{"Семена":2,"Лопата":1},"т":90,"з":"Садоводческий магазин"},"Садовая мебель":{"р":{"Пластмасса":2,"Ткани":2,"Доски":2},"т":135,"з":"Садоводческий магазин"},"Костровая чаша":{"р":{"Кирпичи":2,"Цемент":2,"Лопата":1},"т":240,"з":"Садоводческий магазин"},"Газонокосилка":{"р":{"Металл":3,"Электротехнические детали":1,"Краска":1},"т":120,"з":"Садоводческий магазин"},"Садовые гномы":{"р":{"Цемент":2,"Клей":1},"т":90,"з":"Садоводческий магазин"},"Пончики":{"р":{"Сахар и специи":1,"Мешки с мукой":1},"т":45,"з":"Киоск с пончиками"},"Зеленый смузи":{"р":{"Овощи":1,"Фрукты и ягоды":1},"т":30,"з":"Киоск с пончиками"},"Булочка":{"р":{"Мешки с мукой":2,"Сливки":1},"т":60,"з":"Киоск с пончиками"},"Вишневый чизкейк":{"р":{"Мешки с мукой":1,"Фрукты и ягоды":1,"Сыр":1},"т":90,"з":"Киоск с пончиками"},"Замороженный йогурт":{"р":{"Сахар и специи":1,"Фрукты и ягоды":1,"Сливки":1},"т":240,"з":"Киоск с пончиками"},"Кофе":{"р":{"Семена":2,"Сахар и специи":1,"Сливки":1},"т":60,"з":"Киоск с пончиками"},"Кепка":{"р":{"Ткани":2,"Рулетка":1},"т":60,"з":"Бутик модной одежды"},"Обувь":{"р":{"Пластмасса":1,"Ткани":2,"Клей":1},"т":75,"з":"Бутик модной одежды"},"Часы":{"р":{"Пластмасса":2,"Химикаты":1,"Стекло":1},"т":90,"з":"Бутик модной одежды"},"Деловые костюмы":{"р":{"Ткани":3,"Клей":1,"Рулетка":1},"т":210,"з":"Бутик модной одежды"},"Рюкзак":{"р":{"Пластмасса":2,"Ткани":2,"Рулетка":1},"т":150,"з":"Бутик модной одежды"},"Мороженое-сэндвич":{"р":{"Сливки":1,"Булочка":1},"т":14,"з":"Ресторан фаст-фуда"},"Пицца":{"р":{"Мешки с мукой":1,"Сыр":1,"Говядина":1},"т":24,"з":"Ресторан фаст-фуда"},"Бургеры":{"р":{"Говядина":1,"Булочка":1,"Гриль":1},"т":35,"з":"Ресторан фаст-фуда"},"Картофельные шарики с сыром":{"р":{"Овощи":1,"Сыр":1},"т":20,"з":"Ресторан фаст-фуда"},"Бутылка с лимонадом":{"р":{"Сахар и специи":2,"Стекло":2,"Фрукты и ягоды":1},"т":60,"з":"Ресторан фаст-фуда"},"Гриль":{"р":{"Металл":3,"Кухонная утварь":1},"т":165,"з":"Бытовая техника"},"Холодильник":{"р":{"Пластмасса":2,"Химикаты":2,"Электротехнические детали":2},"т":210,"з":"Бытовая техника"},"Осветительная система":{"р":{"Химикаты":1,"Стекло":1,"Электротехнические детали":1},"т":105,"з":"Бытовая техника"},"Телевизор":{"р":{"Пластмасса":2,"Стекло":2,"Электротехнические детали":2},"т":150,"з":"Бытовая техника"},"Теннисная ракетка":{"р":{"Минералы":4,"Молоток":2},"т":36,"з":"Спортивная мастерская"},"Кокосовое масло":{"р":{"Кокос":2},"т":20,"з":"Магазин продукции из тропиков"},"Крем для лица":{"р":{"Кокосовое масло":2,"Химикаты":2},"т":90,"з":"Магазин продукции из тропиков"},"Напиток из тропиков":{"р":{"Кокос":2,"Фрукты и ягоды":2,"Сахар и специи":1},"т":250,"з":"Магазин продукции из тропиков"},"Спортивный напиток":{"р":{"Сахар и специи":4,"Фрукты и ягоды":2},"т":null,"з":"Спортивная мастерская"}};
-let R, T, B, names, isRaw;
+let R, T, B, names, isRaw, SPECIAL=[];
 function fromRecipes(data){
-  R={}; T={}; B={};
-  for(const n in data){ R[n]=data[n].р||{}; T[n]=data[n].т; B[n]=data[n].з||(Object.keys(data[n].р||{}).length?'Другое':'Завод'); }
-  names=Object.keys(R); isRaw=function(n){return !Object.keys(R[n]).length};
+R={}; T={}; B={};
+for(const n in data){ R[n]=data[n].р||{}; T[n]=data[n].т; B[n]=data[n].з||(Object.keys(data[n].р||{}).length?'Другое':'Завод'); }
+names=Object.keys(R); isRaw=function(n){return !Object.keys(R[n]).length};
 }
 function boot(){
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cnt=o=>Object.values(o).filter(v=>v>0).length;
 const norm=s=>String(s).trim().toLowerCase();
-let S={secs:[{id:1,name:'Общее',p:1}],orders:[{id:1,name:'Заказ 1',sec:1,count:1,formed:false,kind:'out',items:{}}],cur:1,stock:{},done:{}};
+let S={secs:[{id:1,name:'Общее',p:1}],orders:[{id:1,name:'Заказ 1',sec:1,count:1,formed:false,kind:'out',items:{}}],cur:1,stock:{},done:{},special:[]};
 let hist=[], histAt=-1, histLock=false;
-let tab='orders', q='', armed=0, armF=0, note='', msg='', nameErr='', dup=null, oq='', armS=0, armR=0, armRC=0, planView='stage', bk={msg:'',txt:'',in:''};
+let tab='orders', q='', armed=0, armF=0, note='', msg='', nameErr='', dup=null, oq='', armS=0, armR=0, armRC=0, planView='stage', bk={msg:'',txt:'',in:''}, spErr='';
 try{
-  const s=JSON.parse(localStorage.getItem('bi')||'null');
-  if(s){
-    if(s.stock)S.stock=s.stock;
-    if(s.done)S.done=s.done;
-    if(s.secs&&s.secs.length)S.secs=s.secs;
-    if(s.orders&&s.orders.length){S.orders=s.orders;S.cur=s.cur||s.orders[0].id}
-    else if(s.need&&cnt(s.need))S.orders=[{id:1,name:'Заказ 1',items:s.need}];
-  }
+const s=JSON.parse(localStorage.getItem('bi')||'null');
+if(s){
+if(s.stock)S.stock=s.stock;
+if(s.done)S.done=s.done;
+if(Array.isArray(s.special))S.special=s.special;
+if(s.secs&&s.secs.length)S.secs=s.secs;
+if(s.orders&&s.orders.length){S.orders=s.orders;S.cur=s.cur||s.orders[0].id}
+else if(s.need&&cnt(s.need))S.orders=[{id:1,name:'Заказ 1',items:s.need}];
+}
 }catch(e){}
 { // миграция и уникальные названия
-  const seen=new Set();
-  S.orders.forEach((o,i)=>{
-    if(!(o.count>=1))o.count=1;
-    if(o.formed===undefined)o.formed=cnt(o.items||{})>0;
-    o.items=o.items||{};
-    const base=(o.name||'Заказ').trim()||'Заказ'; let n=base, k=2;
-    while(seen.has(norm(n)))n=`${base} (${k++})`;
-    o.name=n; seen.add(norm(n));
-  });
+const seen=new Set();
+S.orders.forEach((o,i)=>{
+if(!(o.count>=1))o.count=1;
+if(o.formed===undefined)o.formed=cnt(o.items||{})>0;
+o.items=o.items||{};
+const base=(o.name||'Заказ').trim()||'Заказ'; let n=base, k=2;
+while(seen.has(norm(n)))n=`${base} (${k++})`;
+o.name=n; seen.add(norm(n));
+});
 }
 S.orders.forEach(o=>{if(!S.secs.some(x=>x.id===o.sec))o.sec=S.secs[0].id});
 function save(){
-  try{localStorage.setItem('bi',JSON.stringify(S))}catch(e){}
-  if(histLock)return;
-  const snap=JSON.stringify(S);
-  if(hist[histAt]===snap)return;
-  hist=hist.slice(0,histAt+1); hist.push(snap);
-  if(hist.length>50)hist.shift(); else histAt++;
+try{localStorage.setItem('bi',JSON.stringify(S))}catch(e){}
+if(histLock)return;
+const snap=JSON.stringify(S);
+if(hist[histAt]===snap)return;
+hist=hist.slice(0,histAt+1); hist.push(snap);
+if(hist.length>50)hist.shift(); else histAt++;
 }
 function jump(d){
-  const i=histAt+d; if(i<0||i>=hist.length)return;
-  histAt=i; histLock=true; S=JSON.parse(hist[i]); histLock=false;
-  try{localStorage.setItem('bi',JSON.stringify(S))}catch(e){}
-  reset(); const y=window.scrollY; render(); window.scrollTo(0,y);
+const i=histAt+d; if(i<0||i>=hist.length)return;
+histAt=i; histLock=true; S=JSON.parse(hist[i]); histLock=false;
+try{localStorage.setItem('bi',JSON.stringify(S))}catch(e){}
+reset(); const y=window.scrollY; render(); window.scrollTo(0,y);
 }
 const cur=()=>S.orders.find(o=>o.id===S.cur)||(S.cur=S.orders[0].id,S.orders[0]);
 const doneOf=(n,k)=>Math.min(S.done[n]||0,k);
 const fmtT=m=>m<60?Math.round(m)+' мин':(+(m/60).toFixed(1))+' ч';
-const chipLabel=o=>(o.kind==='in'?'📥 ':'')+(o.name||'Без названия')+((o.count||1)>1?' ×'+o.count:'')+(o.formed?'':' ✎');
+const chipLabel=o=>(o.kind==='in'?'📥 ':o.kind==='swap'?'🔁 ':'')+(o.name||'Без названия')+((o.count||1)>1?' ×'+o.count:'')+(o.formed?'':' ✎');
 const nameTaken=(v,id)=>S.orders.some(o=>o.id!==id&&norm(o.name)===norm(v));
 const uniqueName=(b,id)=>{const base=b.trim()||'Заказ'; let n=base,k=2; while(nameTaken(n,id))n=`${base} (${k++})`; return n};
 const nextName=()=>{let i=1; while(nameTaken('Заказ '+i,0))i++; return 'Заказ '+i};
@@ -163,197 +165,200 @@ const secsSorted=()=>[...S.secs].sort((a,b)=>a.p-b.p||a.id-b.id);
 const sig=o=>Object.entries(o.items).filter(e=>e[1]>0).sort().map(e=>e.join(':')).join('|');
 // длительность одного заказа без учёта склада: сырьё параллельно, одинаковые композитные подряд, разные параллельно
 function dur(o){
-  const mk={};
-  const req=(n,k)=>{mk[n]=(mk[n]||0)+k; for(const [i,c] of Object.entries(R[n]))req(i,c*k)};
-  for(const [n,k] of Object.entries(o.items))if(k>0)req(n,k);
-  const memo={}, fin=n=>(n in memo)?memo[n]:(memo[n]=(T[n]||0)*(isRaw(n)?1:mk[n])+Math.max(0,...Object.keys(R[n]).map(fin)));
-  return Math.max(0,...Object.entries(o.items).filter(e=>e[1]>0).map(e=>fin(e[0])));
+const mk={};
+const req=(n,k)=>{mk[n]=(mk[n]||0)+k; for(const [i,c] of Object.entries(R[n]))req(i,c*k)};
+for(const [n,k] of Object.entries(o.items))if(k>0)req(n,k);
+const memo={}, fin=n=>(n in memo)?memo[n]:(memo[n]=(T[n]||0)*(isRaw(n)?1:mk[n])+Math.max(0,...Object.keys(R[n]).map(fin)));
+return Math.max(0,...Object.entries(o.items).filter(e=>e[1]>0).map(e=>fin(e[0])));
 }
 // порядок: сформированные вперёд, затем по приоритету секции, внутри — от коротких к длинным
 const sorted=()=>S.orders.map(o=>({o,d:dur(o)})).sort((a,b)=>(Number(b.o.formed)-Number(a.o.formed))||(secP(a.o)-secP(b.o))||(a.d-b.d)||(a.o.id-b.o.id));
 const ordered=()=>sorted().filter(x=>x.o.formed);
-
 function plan(){
-  const st={...S.stock}, make={}, used={}, per=[], pri={}, sets={}, by={};
-  ordered().forEach(({o,d})=>{
-    for(let u=0;u<(o.count||1);u++){   // одинаковые заказы идут по очереди
-      const mk={}, us={};
-      const req=(n,k)=>{
-        const t=Math.min(st[n]||0,k);
-        if(t){st[n]-=t; used[n]=(used[n]||0)+t; us[n]=(us[n]||0)+t}
-        const r=k-t; if(r<=0)return;
-        mk[n]=(mk[n]||0)+r; make[n]=(make[n]||0)+r;
-        pri[n]=Math.min(n in pri?pri[n]:1e9,secP(o)); (sets[n]||(sets[n]=new Set())).add(o.sec);
-        by[n]=by[n]||{}; by[n][o.sec]=(by[n][o.sec]||0)+r;
-        for(const [i,c] of Object.entries(R[n]))req(i,c*r);
-      };
-      for(const [n,k] of Object.entries(o.items))if(k>0)req(n,k);
-      per.push({o,mk,d,us});
-    }
-  });
-  const dc={}, d=n=>(n in dc)?dc[n]:(dc[n]=Object.keys(R[n]).length?1+Math.max(...Object.keys(R[n]).map(d)):0);
-  const g={}; for(const n in make)(g[d(n)]||(g[d(n)]=[])).push([n,make[n]]);
-  const tag={};
-  for(const n in sets){
-    const ids=[...sets[n]].sort((a,b)=>secOf(a).p-secOf(b).p||a-b);
-    tag[n]=ids.length>1?ids.map(id=>secOf(id).name+': '+by[n][id]).join(' · '):secOf(ids[0]).name;
-  }
-  return {g,used,per,meta:{pri,tag}};
+const st={...S.stock}, make={}, used={}, per=[], pri={}, sets={}, by={};
+ordered().forEach(({o,d})=>{
+if(o.kind==='in'){per.push({o,mk:{},d,us:{}});return}
+for(let u=0;u<(o.count||1);u++){ // одинаковые заказы идут по очереди
+const mk={}, us={};
+const req=(n,k)=>{
+const t=Math.min(st[n]||0,k);
+if(t){st[n]-=t; used[n]=(used[n]||0)+t; us[n]=(us[n]||0)+t}
+const r=k-t; if(r<=0)return;
+mk[n]=(mk[n]||0)+r; make[n]=(make[n]||0)+r;
+pri[n]=Math.min(n in pri?pri[n]:1e9,secP(o)); (sets[n]||(sets[n]=new Set())).add(o.sec);
+by[n]=by[n]||{}; by[n][o.sec]=(by[n][o.sec]||0)+r;
+for(const [i,c] of Object.entries(R[n]))req(i,c*r);
+};
+for(const [n,k] of Object.entries(o.items))if(k>0)req(n,k);
+per.push({o,mk,d,us});
 }
-
+});
+const dc={}, d=n=>(n in dc)?dc[n]:(dc[n]=Object.keys(R[n]).length?1+Math.max(...Object.keys(R[n]).map(d)):0);
+const g={}; for(const n in make)(g[d(n)]||(g[d(n)]=[])).push([n,make[n]]);
+const tag={};
+for(const n in sets){
+const ids=[...sets[n]].sort((a,b)=>secOf(a).p-secOf(b).p||a-b);
+tag[n]=ids.length>1?ids.map(id=>secOf(id).name+': '+by[n][id]).join(' · '):secOf(ids[0]).name;
+}
+return {g,used,per,meta:{pri,tag}};
+}
+// особые ресурсы: базовые из special.json + добавленные вручную
+const specAll=()=>[...SPECIAL,...S.special.filter(n=>!SPECIAL.includes(n))];
 // выполнить один заказ (из группы одинаковых — одну штуку)
 function finish(id){
-  const o=S.orders.find(x=>x.id===id); if(!o)return;
-  const left=(o.count||1)-1;
-  if(o.kind==='in'){
-    const added=[];
-    for(const [n,k] of Object.entries(o.items)){
-      if(k>0){S.stock[n]=(S.stock[n]||0)+k; added.push(n+' ×'+k)}
-    }
-    note='✅ «'+o.name+'» получен'+(left>0?' (осталось ещё '+left+')':'')+'. На склад добавлено: '+(added.join(', ')||'ничего');
-  }else{
-    const p=plan().per.find(x=>x.o.id===id); if(!p)return;
-    const took=[];
-    for(const [n,k] of Object.entries(p.us)){
-      const v=Math.max(0,(S.stock[n]||0)-k); if(v)S.stock[n]=v; else delete S.stock[n];
-      took.push(n+' ×'+k);
-    }
-    for(const [n,k] of Object.entries(p.mk)){
-      const v=Math.max(0,(S.done[n]||0)-k); if(v)S.done[n]=v; else delete S.done[n];
-    }
-    note='✅ «'+o.name+'» выполнен'+(left>0?' (осталось ещё '+left+')':'')+'. Со склада списано: '+(took.join(', ')||'ничего');
-  }
-  if(left>0)o.count=left; else S.orders=S.orders.filter(x=>x.id!==id);
-  if(!S.orders.length)S.orders.push({id:id+1,name:'Заказ 1',sec:S.secs[0].id,count:1,formed:false,kind:'out',items:{}});
-  if(!S.orders.some(x=>x.id===S.cur))S.cur=sorted()[0].o.id;
-  armF=0; armed=0;
+const o=S.orders.find(x=>x.id===id); if(!o)return;
+const left=(o.count||1)-1;
+if(o.kind==='in'){
+const added=[];
+for(const [n,k] of Object.entries(o.items)){
+if(k>0){S.stock[n]=(S.stock[n]||0)+k; added.push(n+' ×'+k)}
 }
-
+note='✅ «'+o.name+'» получен'+(left>0?' (осталось ещё '+left+')':'')+'. На склад добавлено: '+(added.join(', ')||'ничего');
+}else{
+const p=plan().per.find(x=>x.o.id===id); if(!p)return;
+const took=[];
+for(const [n,k] of Object.entries(p.us)){
+const v=Math.max(0,(S.stock[n]||0)-k); if(v)S.stock[n]=v; else delete S.stock[n];
+took.push(n+' ×'+k);
+}
+for(const [n,k] of Object.entries(p.mk)){
+const v=Math.max(0,(S.done[n]||0)-k); if(v)S.done[n]=v; else delete S.done[n];
+}
+note='✅ «'+o.name+'» выполнен'+(left>0?' (осталось ещё '+left+')':'')+'. Со склада списано: '+(took.join(', ')||'ничего');
+}
+if(o.kind==='swap'&&o.get&&o.get.name&&o.get.qty>0){
+if(!specAll().includes(o.get.name))S.special.push(o.get.name);
+S.stock[o.get.name]=(S.stock[o.get.name]||0)+o.get.qty;
+note+='. Получено: '+o.get.name+' ×'+o.get.qty;
+}
+if(left>0)o.count=left; else S.orders=S.orders.filter(x=>x.id!==id);
+if(!S.orders.length)S.orders.push({id:id+1,name:'Заказ 1',sec:S.secs[0].id,count:1,formed:false,kind:'out',items:{}});
+if(!S.orders.some(x=>x.id===S.cur))S.cur=sorted()[0].o.id;
+armF=0; armed=0;
+}
 const card=(t,a,chk,cn=true,meta)=>{
-  a.sort((x,y)=>(meta?meta.pri[x[0]]-meta.pri[y[0]]:0)||x[0].localeCompare(y[0],'ru'));
-  const dn=a.filter(([n,k])=>doneOf(n,k)>=k).length;
-  return `<div class="card"><h3>${t}${chk&&cn?`<span class="pg">${dn}/${a.length}</span>`:''}</h3>${a.map(([n,k])=>{
-    const i=names.indexOf(n), d=doneOf(n,k), full=chk&&d>=k;
-    if(!chk)return `<div class="it"><span>${n}</span><b>×${k}</b></div>`;
-    return `<div class="it ck${full?' dn':''}"><i data-c="${i}" data-k="${k}">${full?'☑':'☐'}</i><span class="nm">${n}${meta&&meta.tag[n]?`<br><small class="tg">${esc(meta.tag[n])}</small>`:''}</span><span class="cn"><button data-cd="-1" data-ci="${i}" data-k="${k}">−</button><input type="number" inputmode="numeric" min="0" max="${k}" value="${d}" data-ci="${i}" data-k="${k}"><em>/${k}</em><button data-cd="1" data-ci="${i}" data-k="${k}">+</button></span></div>`}).join('')}</div>`};
-
+a.sort((x,y)=>(meta?meta.pri[x[0]]-meta.pri[y[0]]:0)||x[0].localeCompare(y[0],'ru'));
+const dn=a.filter(([n,k])=>doneOf(n,k)>=k).length;
+return `<div class="card"><h3>${t}${chk&&cn?`<span class="pg">${dn}/${a.length}</span>`:''}</h3>${a.map(([n,k])=>{
+const i=names.indexOf(n), d=doneOf(n,k), full=chk&&d>=k;
+if(!chk)return `<div class="it"><span>${n}</span><b>×${k}</b></div>`;
+return `<div class="it ck${full?' dn':''}"><i data-c="${i}" data-k="${k}">${full?'☑':'☐'}</i><span class="nm">${n}${meta&&meta.tag[n]?`<br><small class="tg">${esc(meta.tag[n])}</small>`:''}</span><span class="cn"><button data-cd="-1" data-ci="${i}" data-k="${k}">−</button><input type="number" inputmode="numeric" min="0" max="${k}" value="${d}" data-ci="${i}" data-k="${k}"><em>/${k}</em><button data-cd="1" data-ci="${i}" data-k="${k}">+</button></span></div>`}).join('')}</div>`};
 const stockBox=()=>`<div class="card"><h3>Текст склада (как в stock.txt)</h3><textarea id="stx" rows="6" placeholder="Металл = 5">${Object.entries(S.stock).filter(e=>e[1]>0).map(e=>e[0]+' = '+e[1]).join('\n')}</textarea><button class="ap" data-ap="1">Применить</button><p class="mut">${msg}</p></div>`;
 const bkLast=()=>{
-  let t=''; try{t=localStorage.getItem('bi_bk')||''}catch(e){}
-  if(!t)return 'Копия ещё не делалась';
-  return 'Последняя копия: '+new Date(t).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+let t=''; try{t=localStorage.getItem('bi_bk')||''}catch(e){}
+if(!t)return 'Копия ещё не делалась';
+return 'Последняя копия: '+new Date(t).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 };
 const backupBox=()=>`<div class="card"><h3>Резервная копия</h3><div class="sm" style="margin-bottom:8px">${bkLast()}</div><button class="ap" data-bkcopy="1" style="margin:0">Скопировать данные</button>${bk.txt?`<textarea id="bktxt" rows="4" readonly style="margin-top:8px">${esc(bk.txt)}</textarea>`:''}<textarea id="rtx" rows="3" placeholder="Вставь сюда копию, чтобы восстановить" style="margin-top:12px">${esc(bk.in)}</textarea>${armR?`<div class="cf" style="margin-top:8px"><span>Заменить текущие данные?</span><button class="arm2" data-rok="1">Заменить</button><button data-cancel="1">Отмена</button></div>`:`<button class="ap" data-rest="1">Восстановить</button>`}<p class="mut">${esc(bk.msg)}</p></div>`;
+const specBox=()=>`<div class="card"><h3>✨ Особые ресурсы</h3>${specAll().map((n,i)=>`<div class="row${S.stock[n]?' on':''}"><span>${esc(n)}</span><span class="st"><button data-sd="-1" data-si="${i}">−</button><b>${S.stock[n]||0}</b>${[1,5,10].map(d=>`<button data-sd="${d}" data-si="${i}">+${d}</button>`).join('')}${SPECIAL.includes(n)?'':`<button data-sdelr="${i}">🗑</button>`}</span></div>`).join('')||'<div class="sm">Пока пусто</div>'}<div class="pr" style="margin-top:8px"><input id="spn" class="sname" maxlength="30" placeholder="Новый ресурс"><button class="ap" data-sadd2="1" style="margin:0">Добавить</button></div><div class="sm er">${esc(spErr)}</div></div>`;
 const noteBox=()=>note?`<div class="card sm">${esc(note)}</div>`:'';
-
 // «молоток 2 гвозди»: слово, после него необязательное количество
 function parseQ(t){
-  const gs=[];
-  for(const w of t.toLowerCase().split(/[\s,;]+/).filter(Boolean)){
-    if(/^\d+$/.test(w)){ if(gs.length&&gs[gs.length-1].q===undefined)gs[gs.length-1].q=+w }
-    else gs.push({t:w});
-  }
-  return gs;
+const gs=[];
+for(const w of t.toLowerCase().split(/[\s,;]+/).filter(Boolean)){
+if(/^\d+$/.test(w)){ if(gs.length&&gs[gs.length-1].q===undefined)gs[gs.length-1].q=+w }
+else gs.push({t:w});
+}
+return gs;
 }
 const itemHit=(n,k,g)=>k>0&&n.toLowerCase().includes(g.t)&&(g.q===undefined||k===g.q);
 const matchOrder=(o,gs)=>gs.every(g=>Object.entries(o.items).some(([n,k])=>itemHit(n,k,g)));
 function ordRes(){
-  const gs=parseQ(oq), cur_=cur();
-  if(!gs.length){
-    const all=sorted();
-    return secsSorted().map(sc=>{
-      const os=all.filter(({o})=>o.sec===sc.id);
-      return `<div class="sh">${esc(sc.name)} <span class="sm">· приоритет ${sc.p}</span></div>`+(os.length?`<div class="chips">${os.map(({o})=>`<button data-oc="${o.id}" class="${o.id===cur_.id?'on':''}">${esc(chipLabel(o))}</button>`).join('')}</div>`:'<div class="sm" style="margin:0 0 10px">нет заказов</div>');
-    }).join('');
-  }
-  const hit=sorted().filter(({o})=>matchOrder(o,gs));
-  if(!hit.length)return '<div class="card sm">Заказов с таким составом нет</div>';
-  return `<div class="sm" style="margin-bottom:6px">Найдено: ${hit.length}</div>`+hit.map(({o})=>{
-    const items=Object.entries(o.items).filter(e=>e[1]>0).sort((a,b)=>a[0].localeCompare(b[0],'ru'))
-      .map(([n,k])=>{const m=gs.some(g=>itemHit(n,k,g)); return (m?'<mark>':'')+esc(n)+' ×'+k+(m?'</mark>':'')}).join(', ');
-    return `<button class="res${o.id===cur_.id?' on':''}" data-oc="${o.id}"><b>${esc(chipLabel(o))}</b> <span class="sm" style="display:inline">· ${esc(secOf(o.sec).name)}</span><span class="sm">${items}</span></button>`}).join('');
+const gs=parseQ(oq), cur_=cur();
+if(!gs.length){
+const all=sorted();
+return secsSorted().map(sc=>{
+const os=all.filter(({o})=>o.sec===sc.id);
+return `<div class="sh">${esc(sc.name)} <span class="sm">· приоритет ${sc.p}</span></div>`+(os.length?`<div class="chips">${os.map(({o})=>`<button data-oc="${o.id}" class="${o.id===cur_.id?'on':''}">${esc(chipLabel(o))}</button>`).join('')}</div>`:'<div class="sm" style="margin:0 0 10px">нет заказов</div>');
+}).join('');
 }
-
+const hit=sorted().filter(({o})=>matchOrder(o,gs));
+if(!hit.length)return '<div class="card sm">Заказов с таким составом нет</div>';
+return `<div class="sm" style="margin-bottom:6px">Найдено: ${hit.length}</div>`+hit.map(({o})=>{
+const items=Object.entries(o.items).filter(e=>e[1]>0).sort((a,b)=>a[0].localeCompare(b[0],'ru'))
+.map(([n,k])=>{const m=gs.some(g=>itemHit(n,k,g)); return (m?'<mark>':'')+esc(n)+' ×'+k+(m?'</mark>':'')}).join(', ');
+return `<button class="res${o.id===cur_.id?' on':''}" data-oc="${o.id}"><b>${esc(chipLabel(o))}</b> <span class="sm" style="display:inline">· ${esc(secOf(o.sec).name)}</span><span class="sm">${items}</span></button>`}).join('');
+}
 function render(){
-  syncHist();
-  const c=cur();
-  $tabs.innerHTML=[['orders','Заказы',S.orders.length],['secs','Секции',S.secs.length],['stock','Склад',cnt(S.stock)],['plan','План','']]
-    .map(([k,l,n])=>`<button data-t="${k}" class="${tab===k?'on':''}">${l}${n?' · '+n:''}</button>`).join('');
-  $q.style.display=(tab==='stock'||(tab==='orders'&&!c.formed))?'':'none';
-
-  if(tab==='plan'){
-    const {g,used,per,meta}=plan();
-    let h=noteBox();
-    const grp=new Map();
-    per.forEach(p=>{let x=grp.get(p.o.id); if(!x){x={o:p.o,d:p.d,mk:{},none:true}; grp.set(p.o.id,x)} for(const [n,k] of Object.entries(p.mk)){x.mk[n]=(x.mk[n]||0)+k; x.none=false}});
-    const drafts=S.orders.filter(o=>!o.formed&&cnt(o.items));
-    if(per.length){
-      h+=`<div class="card"><h3>📋 Заказы</h3>${[...grp.values()].map(x=>{
-        const raw=Object.entries(x.mk).filter(([n])=>isRaw(n)).map(([n,k])=>`${n} ×${k}`).join(', ');
-        return `<div class="od"><b>${esc(chipLabel(x.o))}</b><span class="sm"> · ${esc(secOf(x.o.sec).name)}</span> <span class="sm">${x.o.kind==='in'?'поступление':(x.none?'✅ хватает склада':'нужно сделать')}</span>${raw?`<div class="sm">🏭 ${raw}</div>`:''}<div>${armF===x.o.id?`<button class="fin mini arm2" data-fin2="${x.o.id}">Да, выполнить</button> <button class="fin mini" data-cancel="1">Отмена</button>`:`<button class="fin mini" data-fin="${x.o.id}">Выполнить</button>`}</div></div>`}).join('')}</div>`;
-    }
-    if(drafts.length)h+=`<div class="card sm">Не сформированы и не учитываются: ${drafts.map(o=>esc(o.name)).join(', ')}</div>`;
-    const anyMake=Object.keys(meta.pri).length>0;
-    if(anyMake)h+=`<div class="tabs sub"><button data-pv="stage" class="${planView==='stores'?'':'on'}">По этапам</button><button data-pv="stores" class="${planView==='stores'?'on':''}">По магазинам</button></div>`;
-    if(planView==='stores'){
-      const bucket={};
-      for(const l in g)g[l].forEach(([n,k])=>{const bld=B[n]||'Другое'; (bucket[bld]||(bucket[bld]=[])).push([n,k])});
-      const order=Object.keys(bucket).sort((a,b)=>(a==='Завод'?-1:b==='Завод'?1:0)||a.localeCompare(b,'ru'));
-      h+=order.map(bld=>card((bld==='Завод'?'🏭 ':'🏪 ')+bld,bucket[bld],true,true,meta)).join('');
-    }else{
-      const lv=Object.keys(g).map(Number).sort((a,b)=>a-b);
-      h+=lv.map(l=>card(l===0?'🏭 Заводы (сырьё)':'🛠 Этап '+l,g[l],true,l>0,meta)).join('');
-    }
-    if(Object.keys(used).length)h+=card('📦 Берём со склада',Object.entries(used));
-    if(anyMake){
-      if(armRC)h+='<div class="cf"><span>Сбросить весь прогресс?</span><button class="arm2" data-rc2="1">Сбросить</button><button data-cancel="1">Отмена</button></div>';
-      else h+='<button class="clr" data-rc="1">Сбросить галочки</button>';
-    }
-    $main.innerHTML=h||'<p class="mut">Сформируй заказ на вкладке «Заказы»</p>';
-    return;
-  }
-
-  if(tab==='secs'){
-    let h=noteBox()+`<button class="add" data-sadd="1">＋ Новая секция</button>`;
-    h+=secsSorted().map(sc=>{const n=S.orders.filter(o=>o.sec===sc.id).length;
-      return `<div class="card"><div class="oh"><input class="sname" data-sname="${sc.id}" value="${esc(sc.name)}" maxlength="30" placeholder="Название секции"><button data-sdel="${sc.id}" ${S.secs.length<2?'disabled':''}>🗑</button></div><div class="pr"><span class="sm">Приоритет (1 — самый важный)<br>Заказов: ${n}</span><span class="cn"><button data-sp="-1" data-sid="${sc.id}">−</button><input type="number" inputmode="numeric" min="1" value="${sc.p}" data-spin="${sc.id}"><button data-sp="1" data-sid="${sc.id}">+</button></span></div>${armS===sc.id?`<div class="cf wrap"><span>Удалить секцию?${n?' Вместе с ней будут удалены заказы в ней ('+n+').':''}</span><button class="arm2" data-sdel2="${sc.id}">Удалить</button><button data-cancel="1">Отмена</button></div>`:''}</div>`}).join('');
-    h+='<div class="sm" style="text-align:center">Заказы наследуют приоритет своей секции.</div>';
-    $main.innerHTML=h; return;
-  }
-  let h=noteBox();
-  if(tab==='orders'){
-    h+=`<button class="add" data-oadd="1">＋ Новый заказ</button>`;
-    h+=`<input id="oq" type="search" placeholder="Найти заказ по составу, напр. «молоток 2»" value="${esc(oq)}"><div id="ores">${ordRes()}</div>`;
-    h+=`<div class="oh"><input id="oname" data-oname="1" value="${esc(c.name)}" maxlength="40" placeholder="Название заказа"><button data-odel="1" ${S.orders.length<2?'disabled':''}>🗑</button></div><div class="sm er" id="nerr">${esc(nameErr)}</div>`;
-    h+=`<div class="pr"><span class="sm">Тип</span><span class="cn"><button data-kind="out" class="${(c.kind||'out')==='out'?'on':''}">📤 Расход</button><button data-kind="in" class="${c.kind==='in'?'on':''}">📥 Поступление</button></span></div>`;
-    h+=`<div class="pr"><span class="sm">Секция</span><select data-osec="1">${secsSorted().map(sc=>`<option value="${sc.id}"${sc.id===c.sec?' selected':''}>${esc(sc.name)} (приоритет ${sc.p})</option>`).join('')}</select></div>`;
-    if(c.kind!=='in')h+=`<div class="sm" style="margin:-4px 0 10px">⏱ Длительность: ${cnt(c.items)?fmtT(dur(c)):'—'}</div>`;
-    else h+=`<div class="sm" style="margin:-4px 0 10px">Эти товары добавятся на склад при выполнении, без производства.</div>`;
-    if(armed===c.id)h+=`<div class="cf"><span>Удалить заказ?</span><button class="arm2" data-odel2="1">Удалить</button><button data-cancel="1">Отмена</button></div>`;
-    if(dup&&dup.id===c.id){
-      const t=S.orders.find(o=>o.id===dup.twin);
-      if(t)h+=`<div class="cf wrap"><span>Такой состав уже есть в заказе «${esc(t.name)}». Добавить к нему ещё ${c.count||1} шт.?</span><button class="arm2" data-dupadd="1">Добавить</button><button data-cancel="1">Отмена</button></div>`;
-    }
-    if(c.formed){
-      const items=Object.entries(c.items).filter(e=>e[1]>0).sort((a,b)=>isRaw(a[0])-isRaw(b[0])||a[0].localeCompare(b[0],'ru'));
-      h+=`<div class="card"><h3>Состав заказа${(c.count||1)>1?` · ×${c.count}`:''}</h3>${items.map(([n,k])=>`<div class="it"><span>${n}</span><b>×${k}</b></div>`).join('')}</div>`;
-      if(armF===c.id)h+=`<div class="cf"><span>Склад и галочки обновятся</span><button class="arm2" data-fin2="${c.id}">Выполнить</button><button data-cancel="1">Отмена</button></div>`;
-      else h+=`<button class="fin" data-fin="${c.id}">Выполнить заказ</button><button class="clr" data-edit="1">Изменить состав</button>`;
-      $main.innerHTML=h; return;
-    }
-    h+=`<div class="cf"><span>Одинаковых заказов</span><span class="cn"><button data-cc="-1">−</button><input type="number" inputmode="numeric" min="1" value="${c.count||1}" data-cin="1"><button data-cc="1">+</button></span></div>`;
-    h+=`<button class="fin" data-form="1" ${cnt(c.items)?'':'disabled'}>Сформировать заказ</button>`;
-  }
-  const obj=tab==='stock'?S.stock:c.items;
-  const arr=names.filter(n=>n.toLowerCase().includes(q))
-    .sort((a,b)=>(tab==='stock'?isRaw(b)-isRaw(a):isRaw(a)-isRaw(b))||a.localeCompare(b,'ru'));
-  h+=arr.map(n=>{const v=obj[n]||0,i=names.indexOf(n);
-    return `<div class="row${v?' on':''}"><span>${n}</span><span class="st"><button data-i="${i}" data-d="-1">−</button><b>${v}</b>${[1,5,10].map(d=>`<button data-i="${i}" data-d="${d}">+${d}</button>`).join('')}</span></div>`}).join('')
-    ||'<p class="mut">Ничего не найдено</p>';
-  h+=(tab==='stock'?stockBox()+backupBox():'')+`<button class="clr" data-clr="1">Очистить ${tab==='orders'?'состав':'склад'}</button>`;
-  $main.innerHTML=h;
+syncHist();
+const c=cur();
+$tabs.innerHTML=[['orders','Заказы',S.orders.length],['secs','Секции',S.secs.length],['stock','Склад',cnt(S.stock)],['plan','План','']]
+.map(([k,l,n])=>`<button data-t="${k}" class="${tab===k?'on':''}">${l}${n?' · '+n:''}</button>`).join('');
+$q.style.display=(tab==='stock'||(tab==='orders'&&!c.formed))?'':'none';
+if(tab==='plan'){
+const {g,used,per,meta}=plan();
+let h=noteBox();
+const grp=new Map();
+per.forEach(p=>{let x=grp.get(p.o.id); if(!x){x={o:p.o,d:p.d,mk:{},none:true}; grp.set(p.o.id,x)} for(const [n,k] of Object.entries(p.mk)){x.mk[n]=(x.mk[n]||0)+k; x.none=false}});
+const drafts=S.orders.filter(o=>!o.formed&&cnt(o.items));
+if(per.length){
+h+=`<div class="card"><h3>📋 Заказы</h3>${[...grp.values()].map(x=>{
+const raw=Object.entries(x.mk).filter(([n])=>isRaw(n)).map(([n,k])=>`${n} ×${k}`).join(', ');
+return `<div class="od"><b>${esc(chipLabel(x.o))}</b><span class="sm"> · ${esc(secOf(x.o.sec).name)}</span> <span class="sm">${x.o.kind==='in'?'поступление':(x.none?'✅ хватает склада':'нужно сделать')}</span>${raw?`<div class="sm">🏭 ${raw}</div>`:''}${x.o.kind==='swap'&&x.o.get&&x.o.get.name?`<div class="sm">🎁 Получим: ${esc(x.o.get.name)} ×${x.o.get.qty}</div>`:''}<div>${armF===x.o.id?`<button class="fin mini arm2" data-fin2="${x.o.id}">Да, выполнить</button> <button class="fin mini" data-cancel="1">Отмена</button>`:`<button class="fin mini" data-fin="${x.o.id}">Выполнить</button>`}</div></div>`}).join('')}</div>`;
 }
-
+if(drafts.length)h+=`<div class="card sm">Не сформированы и не учитываются: ${drafts.map(o=>esc(o.name)).join(', ')}</div>`;
+const anyMake=Object.keys(meta.pri).length>0;
+if(anyMake)h+=`<div class="tabs sub"><button data-pv="stage" class="${planView==='stores'?'':'on'}">По этапам</button><button data-pv="stores" class="${planView==='stores'?'on':''}">По магазинам</button></div>`;
+if(planView==='stores'){
+const bucket={};
+for(const l in g)g[l].forEach(([n,k])=>{const bld=B[n]||'Другое'; (bucket[bld]||(bucket[bld]=[])).push([n,k])});
+const order=Object.keys(bucket).sort((a,b)=>(a==='Завод'?-1:b==='Завод'?1:0)||a.localeCompare(b,'ru'));
+h+=order.map(bld=>card((bld==='Завод'?'🏭 ':'🏪 ')+bld,bucket[bld],true,true,meta)).join('');
+}else{
+const lv=Object.keys(g).map(Number).sort((a,b)=>a-b);
+h+=lv.map(l=>card(l===0?'🏭 Заводы (сырьё)':'🛠 Этап '+l,g[l],true,l>0,meta)).join('');
+}
+if(Object.keys(used).length)h+=card('📦 Берём со склада',Object.entries(used));
+if(anyMake){
+if(armRC)h+='<div class="cf"><span>Сбросить весь прогресс?</span><button class="arm2" data-rc2="1">Сбросить</button><button data-cancel="1">Отмена</button></div>';
+else h+='<button class="clr" data-rc="1">Сбросить галочки</button>';
+}
+$main.innerHTML=h||'<p class="mut">Сформируй заказ на вкладке «Заказы»</p>';
+return;
+}
+if(tab==='secs'){
+let h=noteBox()+`<button class="add" data-sadd="1">＋ Новая секция</button>`;
+h+=secsSorted().map(sc=>{const n=S.orders.filter(o=>o.sec===sc.id).length;
+return `<div class="card"><div class="oh"><input class="sname" data-sname="${sc.id}" value="${esc(sc.name)}" maxlength="30" placeholder="Название секции"><button data-sdel="${sc.id}" ${S.secs.length<2?'disabled':''}>🗑</button></div><div class="pr"><span class="sm">Приоритет (1 — самый важный)<br>Заказов: ${n}</span><span class="cn"><button data-sp="-1" data-sid="${sc.id}">−</button><input type="number" inputmode="numeric" min="1" value="${sc.p}" data-spin="${sc.id}"><button data-sp="1" data-sid="${sc.id}">+</button></span></div>${armS===sc.id?`<div class="cf wrap"><span>Удалить секцию?${n?' Вместе с ней будут удалены заказы в ней ('+n+').':''}</span><button class="arm2" data-sdel2="${sc.id}">Удалить</button><button data-cancel="1">Отмена</button></div>`:''}</div>`}).join('');
+h+='<div class="sm" style="text-align:center">Заказы наследуют приоритет своей секции.</div>';
+$main.innerHTML=h; return;
+}
+let h=noteBox();
+if(tab==='orders'){
+h+=`<button class="add" data-oadd="1">＋ Новый заказ</button>`;
+h+=`<input id="oq" type="search" placeholder="Найти заказ по составу, напр. «молоток 2»" value="${esc(oq)}"><div id="ores">${ordRes()}</div>`;
+h+=`<div class="oh"><input id="oname" data-oname="1" value="${esc(c.name)}" maxlength="40" placeholder="Название заказа"><button data-odel="1" ${S.orders.length<2?'disabled':''}>🗑</button></div><div class="sm er" id="nerr">${esc(nameErr)}</div>`;
+h+=`<div class="pr"><span class="sm">Тип</span><span class="cn"><button data-kind="out" class="${(c.kind||'out')==='out'?'on':''}">📤 Расход</button><button data-kind="in" class="${c.kind==='in'?'on':''}">📥 Поступление</button><button data-kind="swap" class="${c.kind==='swap'?'on':''}">🔁 Обмен</button></span></div>`;
+if(c.kind==='swap'){const gt=c.get||{name:'',qty:1}; h+=`<div class="cf wrap"><span>Получаем</span>${specAll().length?`<select data-gname="1"><option value="">— выбрать —</option>${specAll().map(n=>`<option${n===gt.name?' selected':''}>${esc(n)}</option>`).join('')}</select><span class="cn"><button data-gq="-1">−</button><input type="number" inputmode="numeric" min="1" value="${gt.qty||1}" data-gqin="1"><button data-gq="1">+</button></span>`:`<span class="sm" style="flex-basis:100%">Сначала добавь особый ресурс на вкладке «Склад»</span>`}</div>`}
+h+=`<div class="pr"><span class="sm">Секция</span><select data-osec="1">${secsSorted().map(sc=>`<option value="${sc.id}"${sc.id===c.sec?' selected':''}>${esc(sc.name)} (приоритет ${sc.p})</option>`).join('')}</select></div>`;
+if(c.kind!=='in')h+=`<div class="sm" style="margin:-4px 0 10px">⏱ Длительность: ${cnt(c.items)?fmtT(dur(c)):'—'}</div>`;
+else h+=`<div class="sm" style="margin:-4px 0 10px">Эти товары добавятся на склад при выполнении, без производства.</div>`;
+if(armed===c.id)h+=`<div class="cf"><span>Удалить заказ?</span><button class="arm2" data-odel2="1">Удалить</button><button data-cancel="1">Отмена</button></div>`;
+if(dup&&dup.id===c.id){
+const t=S.orders.find(o=>o.id===dup.twin);
+if(t)h+=`<div class="cf wrap"><span>Такой состав уже есть в заказе «${esc(t.name)}». Добавить к нему ещё ${c.count||1} шт.?</span><button class="arm2" data-dupadd="1">Добавить</button><button data-cancel="1">Отмена</button></div>`;
+}
+if(c.formed){
+const items=Object.entries(c.items).filter(e=>e[1]>0).sort((a,b)=>isRaw(a[0])-isRaw(b[0])||a[0].localeCompare(b[0],'ru'));
+h+=`<div class="card"><h3>Состав заказа${(c.count||1)>1?` · ×${c.count}`:''}</h3>${items.map(([n,k])=>`<div class="it"><span>${n}</span><b>×${k}</b></div>`).join('')}</div>`;
+if(c.kind==='swap'&&c.get&&c.get.name)h+=`<div class="card sm">🎁 Получим: ${esc(c.get.name)} ×${c.get.qty}</div>`;
+if(armF===c.id)h+=`<div class="cf"><span>Склад и галочки обновятся</span><button class="arm2" data-fin2="${c.id}">Выполнить</button><button data-cancel="1">Отмена</button></div>`;
+else h+=`<button class="fin" data-fin="${c.id}">Выполнить заказ</button><button class="clr" data-edit="1">Изменить состав</button>`;
+$main.innerHTML=h; return;
+}
+h+=`<div class="cf"><span>Одинаковых заказов</span><span class="cn"><button data-cc="-1">−</button><input type="number" inputmode="numeric" min="1" value="${c.count||1}" data-cin="1"><button data-cc="1">+</button></span></div>`;
+h+=`<button class="fin" data-form="1" ${cnt(c.items)&&(c.kind!=='swap'||(c.get&&c.get.name))?'':'disabled'}>Сформировать заказ</button>`;
+}
+if(tab==='stock')h+=specBox();
+const obj=tab==='stock'?S.stock:c.items;
+const arr=names.filter(n=>n.toLowerCase().includes(q))
+.sort((a,b)=>(tab==='stock'?isRaw(b)-isRaw(a):isRaw(a)-isRaw(b))||a.localeCompare(b,'ru'));
+h+=arr.map(n=>{const v=obj[n]||0,i=names.indexOf(n);
+return `<div class="row${v?' on':''}"><span>${n}</span><span class="st"><button data-i="${i}" data-d="-1">−</button><b>${v}</b>${[1,5,10].map(d=>`<button data-i="${i}" data-d="${d}">+${d}</button>`).join('')}</span></div>`}).join('')
+||'<p class="mut">Ничего не найдено</p>';
+h+=(tab==='stock'?stockBox()+backupBox():'')+`<button class="clr" data-clr="1">Очистить ${tab==='orders'?'состав':'склад'}</button>`;
+$main.innerHTML=h;
+}
 const $tabs=document.getElementById('tabs'), $q=document.getElementById('q'), $main=document.getElementById('main');
 const $undo=document.getElementById('undo'), $redo=document.getElementById('redo');
 $undo.onclick=()=>jump(-1); $redo.onclick=()=>jump(1);
@@ -367,139 +372,149 @@ $main.onkeydown=e=>{if(e.key==='Enter'&&e.target.id==='oq')e.target.blur()};
 $q.onkeydown=e=>{if(e.key==='Enter')$q.blur()};
 $main.onfocusin=e=>{if(e.target.tagName==='INPUT')setTimeout(()=>e.target.select(),0)};
 $main.oninput=e=>{
-  const t=e.target;
-  if(t.id==='oq'){oq=t.value; document.getElementById('ores').innerHTML=ordRes(); return}
-  if(t.dataset.oname===undefined)return;
-  const c=cur(), v=t.value, bad=v.trim()&&nameTaken(v,c.id);
-  document.getElementById('nerr').textContent=bad?'Такое название уже есть':'';
-  if(!bad&&v.trim()){
-    c.name=v; save();
-    const ch=document.querySelector('[data-oc="'+c.id+'"]');
-    if(ch)ch.textContent=chipLabel(c);
-  }
+const t=e.target;
+if(t.id==='oq'){oq=t.value; document.getElementById('ores').innerHTML=ordRes(); return}
+if(t.dataset.oname===undefined)return;
+const c=cur(), v=t.value, bad=v.trim()&&nameTaken(v,c.id);
+document.getElementById('nerr').textContent=bad?'Такое название уже есть':'';
+if(!bad&&v.trim()){
+c.name=v; save();
+const ch=document.querySelector('[data-oc="'+c.id+'"]');
+if(ch)ch.textContent=chipLabel(c);
+}
 };
 $main.onchange=e=>{
-  const t=e.target, c=cur();
-  if(t.dataset.osec!==undefined){c.sec=+t.value;keep();return}
-  if(t.dataset.sname!==undefined){
-    const sc=S.secs.find(x=>x.id===+t.dataset.sname); let v=t.value.trim();
-    const tk=v&&secTaken(v,sc.id);
-    if(!v||tk){const u=secUnique(v||'Секция',sc.id); note=tk?'«'+v+'» уже есть — назвал «'+u+'»':''; v=u} else note='';
-    sc.name=v; keep(); return;
-  }
-  if(t.dataset.spin!==undefined){const sc=S.secs.find(x=>x.id===+t.dataset.spin); sc.p=Math.max(1,parseInt(t.value,10)||1); keep(); return}
-  if(t.dataset.oname!==undefined){
-    let v=t.value.trim();
-    const taken=v&&nameTaken(v,c.id);
-    if(!v||taken){const u=uniqueName(v||'Заказ',c.id); nameErr=taken?'«'+v+'» уже есть — назвал «'+u+'»':''; v=u}
-    else nameErr='';
-    c.name=v; keep(); return;
-  }
-  if(t.dataset.cin!==undefined){c.count=Math.max(1,parseInt(t.value,10)||1);keep();return}
-  if(t.tagName!=='INPUT'||t.dataset.ci===undefined)return;
-  const n=names[+t.dataset.ci], k=+t.dataset.k;
-  S.done[n]=Math.max(0,Math.min(k,parseInt(t.value,10)||0));
-  keep();
+const t=e.target, c=cur();
+if(t.dataset.osec!==undefined){c.sec=+t.value;keep();return}
+if(t.dataset.gname!==undefined){c.get={name:t.value,qty:(c.get&&c.get.qty)||1};keep();return}
+if(t.dataset.gqin!==undefined){c.get={name:(c.get&&c.get.name)||'',qty:Math.max(1,parseInt(t.value,10)||1)};keep();return}
+if(t.dataset.sname!==undefined){
+const sc=S.secs.find(x=>x.id===+t.dataset.sname); let v=t.value.trim();
+const tk=v&&secTaken(v,sc.id);
+if(!v||tk){const u=secUnique(v||'Секция',sc.id); note=tk?'«'+v+'» уже есть — назвал «'+u+'»':''; v=u} else note='';
+sc.name=v; keep(); return;
+}
+if(t.dataset.spin!==undefined){const sc=S.secs.find(x=>x.id===+t.dataset.spin); sc.p=Math.max(1,parseInt(t.value,10)||1); keep(); return}
+if(t.dataset.oname!==undefined){
+let v=t.value.trim();
+const taken=v&&nameTaken(v,c.id);
+if(!v||taken){const u=uniqueName(v||'Заказ',c.id); nameErr=taken?'«'+v+'» уже есть — назвал «'+u+'»':''; v=u}
+else nameErr='';
+c.name=v; keep(); return;
+}
+if(t.dataset.cin!==undefined){c.count=Math.max(1,parseInt(t.value,10)||1);keep();return}
+if(t.tagName!=='INPUT'||t.dataset.ci===undefined)return;
+const n=names[+t.dataset.ci], k=+t.dataset.k;
+S.done[n]=Math.max(0,Math.min(k,parseInt(t.value,10)||0));
+keep();
 };
 $main.onclick=e=>{
-  const g=a=>e.target.closest('['+a+']'); let x; const c=cur();
-  if(x=g('data-oc')){S.cur=+x.dataset.oc;reset();keep();return}
-  if(g('data-oadd')){
-    const id=Math.max(0,...S.orders.map(o=>o.id))+1;
-    S.orders.push({id,name:nextName(),sec:c.sec,count:1,formed:false,items:{}}); S.cur=id; reset(); keep(); return;
-  }
-  if(g('data-sadd')){
-    const id=Math.max(0,...S.secs.map(v=>v.id))+1;
-    S.secs.push({id,name:secNext(),p:Math.max(...S.secs.map(v=>v.p))+1}); reset(); note=''; keep(); return;
-  }
-  if(x=g('data-sp')){const sc=S.secs.find(v=>v.id===+x.dataset.sid); sc.p=Math.max(1,sc.p+ +x.dataset.sp); keep(); return}
-  if(x=g('data-sdel')){if(S.secs.length>1){armS=+x.dataset.sdel;armed=0;armF=0;render()}return}
-  if(x=g('data-sdel2')){
-    const id=+x.dataset.sdel2; if(S.secs.length<2)return;
-    const removed=S.orders.filter(o=>o.sec===id).length;
-    S.orders=S.orders.filter(o=>o.sec!==id);
-    S.secs=S.secs.filter(v=>v.id!==id);
-    if(!S.orders.length)S.orders.push({id:Math.max(0,...S.orders.map(x=>x.id),0)+1,name:nextName(),sec:S.secs[0].id,count:1,formed:false,kind:'out',items:{}});
-    if(!S.orders.some(o=>o.id===S.cur))S.cur=S.orders[0].id;
-    reset();
-    note='Секция удалена'+(removed?'. Заказы в ней ('+removed+') тоже удалены':''); keep(); return;
-  }
-  if(g('data-bkcopy')){
-    const txt=localStorage.getItem('bi')||JSON.stringify(S);
-    try{localStorage.setItem('bi_bk',new Date().toISOString())}catch(e){}
-    const done=m=>{bk.msg=m; render()};
-    bk.txt='';
-    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(()=>done('Скопировано в буфер обмена'),()=>{bk.txt=txt;done('Не удалось скопировать сам — выдели текст ниже и скопируй')});
-    else{bk.txt=txt;done('Выдели текст ниже и скопируй')}
-    return;
-  }
-  if(g('data-rest')){
-    bk.in=document.getElementById('rtx').value.trim();
-    let ok=false; try{const o=JSON.parse(bk.in); ok=!!(o&&typeof o==='object'&&(Array.isArray(o.orders)||o.need))}catch(e){}
-    if(!ok){bk.msg='Это не похоже на копию данных';render();return}
-    armR=1; bk.msg=''; render(); return;
-  }
-  if(g('data-rok')){try{localStorage.setItem('bi',bk.in)}catch(e){} location.reload(); return}
-  if(x=g('data-kind')){c.kind=x.dataset.kind; keep(); return}
-  if(x=g('data-pv')){planView=x.dataset.pv; render(); return}
-  if(g('data-cancel')){reset();render();return}
-  if(x=g('data-cc')){c.count=Math.max(1,(c.count||1)+ +x.dataset.cc); keep(); return}
-  if(g('data-form')){
-    if(!cnt(c.items))return;
-    const twin=S.orders.find(o=>o.id!==c.id&&o.formed&&sig(o)===sig(c));
-    if(twin){dup={id:c.id,twin:twin.id};render();return}
-    c.formed=true; reset(); keep(); return;
-  }
-  if(g('data-dupadd')){
-    const t=S.orders.find(o=>o.id===(dup&&dup.twin)); if(!t)return;
-    t.count=(t.count||1)+(c.count||1);
-    S.orders=S.orders.filter(o=>o.id!==c.id); S.cur=t.id; reset();
-    note='Добавлено к «'+t.name+'»: теперь ×'+t.count; keep(); return;
-  }
-  if(g('data-edit')){c.formed=false; reset(); keep(); return}
-  if(x=g('data-fin')){armF=+x.dataset.fin;armed=0;render();return}
-  if(x=g('data-fin2')){finish(+x.dataset.fin2);keep();return}
-  if(g('data-odel')){if(S.orders.length>1){armed=S.cur;armF=0;render()}return}
-  if(g('data-odel2')){
-    if(S.orders.length<2)return;
-    S.orders=S.orders.filter(o=>o.id!==S.cur); S.cur=sorted()[0].o.id; reset(); keep(); return;
-  }
-  if(g('data-ap')){
-    const ns={},bad=[];
-    document.getElementById('stx').value.split('\n').forEach(l=>{
-      l=l.split('#')[0].trim(); if(!l)return;
-      const p=l.lastIndexOf('='), n=(p<0?l:l.slice(0,p)).trim(), k=p<0?1:parseInt(l.slice(p+1),10);
-      if(!(n in R)||!(k>0))bad.push(n||l); else ns[n]=(ns[n]||0)+k;
-    });
-    S.stock=ns; msg=bad.length?'Не распознано: '+bad.join(', '):'Склад обновлён'; keep(); return;
-  }
-  if(g('data-clr')){if(tab==='stock')S.stock={}; else c.items={}; keep(); return}
-  if(g('data-rc')){armRC=1;render();return}
-  if(g('data-rc2')){S.done={};reset();keep();return}
-  if(x=g('data-c')){
-    const n=names[+x.dataset.c], k=+x.dataset.k;
-    if(doneOf(n,k)>=k)delete S.done[n]; else S.done[n]=k;
-    keep(); return;
-  }
-  if(x=g('data-cd')){
-    const n=names[+x.dataset.ci], k=+x.dataset.k;
-    S.done[n]=Math.max(0,Math.min(k,doneOf(n,k)+ +x.dataset.cd)); keep(); return;
-  }
-  if(x=g('data-i')){
-    const o=tab==='stock'?S.stock:c.items, n=names[+x.dataset.i];
-    o[n]=Math.max(0,(o[n]||0)+ +x.dataset.d); keep();
-  }
+const g=a=>e.target.closest('['+a+']'); let x; const c=cur();
+if(x=g('data-oc')){S.cur=+x.dataset.oc;reset();keep();return}
+if(g('data-oadd')){
+const id=Math.max(0,...S.orders.map(o=>o.id))+1;
+S.orders.push({id,name:nextName(),sec:c.sec,count:1,formed:false,items:{}}); S.cur=id; reset(); keep(); return;
+}
+if(g('data-sadd')){
+const id=Math.max(0,...S.secs.map(v=>v.id))+1;
+S.secs.push({id,name:secNext(),p:Math.max(...S.secs.map(v=>v.p))+1}); reset(); note=''; keep(); return;
+}
+if(x=g('data-sp')){const sc=S.secs.find(v=>v.id===+x.dataset.sid); sc.p=Math.max(1,sc.p+ +x.dataset.sp); keep(); return}
+if(x=g('data-sdel')){if(S.secs.length>1){armS=+x.dataset.sdel;armed=0;armF=0;render()}return}
+if(x=g('data-sdel2')){
+const id=+x.dataset.sdel2; if(S.secs.length<2)return;
+const removed=S.orders.filter(o=>o.sec===id).length;
+S.orders=S.orders.filter(o=>o.sec!==id);
+S.secs=S.secs.filter(v=>v.id!==id);
+if(!S.orders.length)S.orders.push({id:Math.max(0,...S.orders.map(x=>x.id),0)+1,name:nextName(),sec:S.secs[0].id,count:1,formed:false,kind:'out',items:{}});
+if(!S.orders.some(o=>o.id===S.cur))S.cur=S.orders[0].id;
+reset();
+note='Секция удалена'+(removed?'. Заказы в ней ('+removed+') тоже удалены':''); keep(); return;
+}
+if(g('data-bkcopy')){
+const txt=localStorage.getItem('bi')||JSON.stringify(S);
+try{localStorage.setItem('bi_bk',new Date().toISOString())}catch(e){}
+const done=m=>{bk.msg=m; render()};
+bk.txt='';
+if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(()=>done('Скопировано в буфер обмена'),()=>{bk.txt=txt;done('Не удалось скопировать сам — выдели текст ниже и скопируй')});
+else{bk.txt=txt;done('Выдели текст ниже и скопируй')}
+return;
+}
+if(g('data-rest')){
+bk.in=document.getElementById('rtx').value.trim();
+let ok=false; try{const o=JSON.parse(bk.in); ok=!!(o&&typeof o==='object'&&(Array.isArray(o.orders)||o.need))}catch(e){}
+if(!ok){bk.msg='Это не похоже на копию данных';render();return}
+armR=1; bk.msg=''; render(); return;
+}
+if(g('data-rok')){try{localStorage.setItem('bi',bk.in)}catch(e){} location.reload(); return}
+if(x=g('data-kind')){c.kind=x.dataset.kind; if(c.kind==='swap'&&!c.get)c.get={name:specAll()[0]||'',qty:1}; keep(); return}
+if(x=g('data-pv')){planView=x.dataset.pv; render(); return}
+if(g('data-cancel')){reset();render();return}
+if(x=g('data-cc')){c.count=Math.max(1,(c.count||1)+ +x.dataset.cc); keep(); return}
+if(g('data-form')){
+if(!cnt(c.items))return;
+const twin=S.orders.find(o=>o.id!==c.id&&o.formed&&sig(o)===sig(c));
+if(twin){dup={id:c.id,twin:twin.id};render();return}
+c.formed=true; reset(); keep(); return;
+}
+if(g('data-dupadd')){
+const t=S.orders.find(o=>o.id===(dup&&dup.twin)); if(!t)return;
+t.count=(t.count||1)+(c.count||1);
+S.orders=S.orders.filter(o=>o.id!==c.id); S.cur=t.id; reset();
+note='Добавлено к «'+t.name+'»: теперь ×'+t.count; keep(); return;
+}
+if(g('data-edit')){c.formed=false; reset(); keep(); return}
+if(x=g('data-fin')){armF=+x.dataset.fin;armed=0;render();return}
+if(x=g('data-fin2')){finish(+x.dataset.fin2);keep();return}
+if(g('data-odel')){if(S.orders.length>1){armed=S.cur;armF=0;render()}return}
+if(g('data-odel2')){
+if(S.orders.length<2)return;
+S.orders=S.orders.filter(o=>o.id!==S.cur); S.cur=sorted()[0].o.id; reset(); keep(); return;
+}
+if(g('data-ap')){
+const ns={},bad=[];
+document.getElementById('stx').value.split('\n').forEach(l=>{
+l=l.split('#')[0].trim(); if(!l)return;
+const p=l.lastIndexOf('='), n=(p<0?l:l.slice(0,p)).trim(), k=p<0?1:parseInt(l.slice(p+1),10);
+if(!((n in R)||specAll().includes(n))||!(k>0))bad.push(n||l); else ns[n]=(ns[n]||0)+k;
+});
+S.stock=ns; msg=bad.length?'Не распознано: '+bad.join(', '):'Склад обновлён'; keep(); return;
+}
+if(g('data-clr')){if(tab==='stock')S.stock={}; else c.items={}; keep(); return}
+if(g('data-rc')){armRC=1;render();return}
+if(g('data-rc2')){S.done={};reset();keep();return}
+if(x=g('data-c')){
+const n=names[+x.dataset.c], k=+x.dataset.k;
+if(doneOf(n,k)>=k)delete S.done[n]; else S.done[n]=k;
+keep(); return;
+}
+if(x=g('data-cd')){
+const n=names[+x.dataset.ci], k=+x.dataset.k;
+S.done[n]=Math.max(0,Math.min(k,doneOf(n,k)+ +x.dataset.cd)); keep(); return;
+}
+if(x=g('data-gq')){const gt=c.get||{name:'',qty:1}; c.get={name:gt.name,qty:Math.max(1,(gt.qty||1)+ +x.dataset.gq)}; keep(); return}
+if(g('data-sadd2')){const v=document.getElementById('spn').value.trim();
+if(!v)spErr='Введи название';
+else if(names.some(n=>norm(n)===norm(v))||specAll().some(s=>norm(s)===norm(v)))spErr='Такой ресурс уже есть';
+else{S.special.push(v);spErr=''}
+keep(); return}
+if(x=g('data-sd')){const n=specAll()[+x.dataset.si]; const v=Math.max(0,(S.stock[n]||0)+ +x.dataset.sd); if(v)S.stock[n]=v; else delete S.stock[n]; keep(); return}
+if(x=g('data-sdelr')){const n=specAll()[+x.dataset.sdelr]; S.special=S.special.filter(s=>s!==n); delete S.stock[n]; keep(); return}
+if(x=g('data-i')){
+const o=tab==='stock'?S.stock:c.items, n=names[+x.dataset.i];
+o[n]=Math.max(0,(o[n]||0)+ +x.dataset.d); keep();
+}
 };
 hist=[JSON.stringify(S)]; histAt=0;
 render();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
-try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 }
+function loadSpecial(){return fetch('special.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():[]}).then(function(a){SPECIAL=Array.isArray(a)?a.filter(function(x){return typeof x==='string'&&x.trim()}):[]}).catch(function(){SPECIAL=[]})}
 fetch('recipes.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():Promise.reject()}).then(function(data){
-  var conv={};
-  for(var n in data){ conv[n]={р:data[n].рецепт||{}, т:data[n].время, з:data[n].здание}; }
-  fromRecipes(conv); boot();
-}).catch(function(){ fromRecipes(FALLBACK); boot(); });
+var conv={};
+for(var n in data){ conv[n]={р:data[n].рецепт||{}, т:data[n].время, з:data[n].здание}; }
+fromRecipes(conv);
+}).catch(function(){ fromRecipes(FALLBACK); }).then(loadSpecial).then(boot);
 </script>
 </body>
 </html>
