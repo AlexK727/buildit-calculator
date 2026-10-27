@@ -103,7 +103,7 @@ let R, T, B, names, isRaw, SPECIAL=[];
 function fromRecipes(data){
 R={}; T={}; B={};
 for(const n in data){ R[n]=data[n].р||{}; T[n]=data[n].т; B[n]=data[n].з||(Object.keys(data[n].р||{}).length?'Другое':'Завод'); }
-names=Object.keys(R); isRaw=function(n){return !Object.keys(R[n]).length};
+names=Object.keys(R); isRaw=function(n){return (n in R)&&!Object.keys(R[n]).length};
 }
 function boot(){
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -166,31 +166,32 @@ const sig=o=>Object.entries(o.items).filter(e=>e[1]>0).sort().map(e=>e.join(':')
 // длительность одного заказа без учёта склада: сырьё параллельно, одинаковые композитные подряд, разные параллельно
 function dur(o){
 const mk={};
-const req=(n,k)=>{mk[n]=(mk[n]||0)+k; for(const [i,c] of Object.entries(R[n]))req(i,c*k)};
+const req=(n,k)=>{if(!(n in R))return; mk[n]=(mk[n]||0)+k; for(const [i,c] of Object.entries(R[n]))req(i,c*k)};
 for(const [n,k] of Object.entries(o.items))if(k>0)req(n,k);
-const memo={}, fin=n=>(n in memo)?memo[n]:(memo[n]=(T[n]||0)*(isRaw(n)?1:mk[n])+Math.max(0,...Object.keys(R[n]).map(fin)));
+const memo={}, fin=n=>!(n in R)?0:(n in memo)?memo[n]:(memo[n]=(T[n]||0)*(isRaw(n)?1:mk[n])+Math.max(0,...Object.keys(R[n]).map(fin)));
 return Math.max(0,...Object.entries(o.items).filter(e=>e[1]>0).map(e=>fin(e[0])));
 }
 // порядок: сформированные вперёд, затем по приоритету секции, внутри — от коротких к длинным
 const sorted=()=>S.orders.map(o=>({o,d:dur(o)})).sort((a,b)=>(Number(b.o.formed)-Number(a.o.formed))||(secP(a.o)-secP(b.o))||(a.d-b.d)||(a.o.id-b.o.id));
 const ordered=()=>sorted().filter(x=>x.o.formed);
 function plan(){
-const st={...S.stock}, make={}, used={}, per=[], pri={}, sets={}, by={};
+const st={...S.stock}, make={}, used={}, per=[], pri={}, sets={}, by={}, short={};
 ordered().forEach(({o,d})=>{
-if(o.kind==='in'){per.push({o,mk:{},d,us:{}});return}
+if(o.kind==='in'){per.push({o,mk:{},d,us:{},ms:{}});return}
 for(let u=0;u<(o.count||1);u++){ // одинаковые заказы идут по очереди
-const mk={}, us={};
+const mk={}, us={}, ms={};
 const req=(n,k)=>{
 const t=Math.min(st[n]||0,k);
 if(t){st[n]-=t; used[n]=(used[n]||0)+t; us[n]=(us[n]||0)+t}
 const r=k-t; if(r<=0)return;
+if(!(n in R)){ms[n]=(ms[n]||0)+r; short[n]=(short[n]||0)+r; return}
 mk[n]=(mk[n]||0)+r; make[n]=(make[n]||0)+r;
 pri[n]=Math.min(n in pri?pri[n]:1e9,secP(o)); (sets[n]||(sets[n]=new Set())).add(o.sec);
 by[n]=by[n]||{}; by[n][o.sec]=(by[n][o.sec]||0)+r;
 for(const [i,c] of Object.entries(R[n]))req(i,c*r);
 };
 for(const [n,k] of Object.entries(o.items))if(k>0)req(n,k);
-per.push({o,mk,d,us});
+per.push({o,mk,d,us,ms});
 }
 });
 const dc={}, d=n=>(n in dc)?dc[n]:(dc[n]=Object.keys(R[n]).length?1+Math.max(...Object.keys(R[n]).map(d)):0);
@@ -225,6 +226,7 @@ for(const [n,k] of Object.entries(p.mk)){
 const v=Math.max(0,(S.done[n]||0)-k); if(v)S.done[n]=v; else delete S.done[n];
 }
 note='✅ «'+o.name+'» выполнен'+(left>0?' (осталось ещё '+left+')':'')+'. Со склада списано: '+(took.join(', ')||'ничего');
+if(p.ms&&Object.keys(p.ms).length)note+='. ⚠️ Не хватало на складе: '+Object.entries(p.ms).map(e=>e[0]+' ×'+e[1]).join(', ');
 }
 if(o.kind==='swap'&&o.get&&o.get.name&&o.get.qty>0){
 if(!specAll().includes(o.get.name))S.special.push(o.get.name);
@@ -241,7 +243,7 @@ a.sort((x,y)=>(meta?meta.pri[x[0]]-meta.pri[y[0]]:0)||x[0].localeCompare(y[0],'r
 const dn=a.filter(([n,k])=>doneOf(n,k)>=k).length;
 return `<div class="card"><h3>${t}${chk&&cn?`<span class="pg">${dn}/${a.length}</span>`:''}</h3>${a.map(([n,k])=>{
 const i=names.indexOf(n), d=doneOf(n,k), full=chk&&d>=k;
-if(!chk)return `<div class="it"><span>${n}</span><b>×${k}</b></div>`;
+if(!chk)return `<div class="it"><span>${esc(n)}</span><b>×${k}</b></div>`;
 return `<div class="it ck${full?' dn':''}"><i data-c="${i}" data-k="${k}">${full?'☑':'☐'}</i><span class="nm">${n}${meta&&meta.tag[n]?`<br><small class="tg">${esc(meta.tag[n])}</small>`:''}</span><span class="cn"><button data-cd="-1" data-ci="${i}" data-k="${k}">−</button><input type="number" inputmode="numeric" min="0" max="${k}" value="${d}" data-ci="${i}" data-k="${k}"><em>/${k}</em><button data-cd="1" data-ci="${i}" data-k="${k}">+</button></span></div>`}).join('')}</div>`};
 const stockBox=()=>`<div class="card"><h3>Текст склада (как в stock.txt)</h3><textarea id="stx" rows="6" placeholder="Металл = 5">${Object.entries(S.stock).filter(e=>e[1]>0).map(e=>e[0]+' = '+e[1]).join('\n')}</textarea><button class="ap" data-ap="1">Применить</button><p class="mut">${msg}</p></div>`;
 const bkLast=()=>{
@@ -289,12 +291,12 @@ if(tab==='plan'){
 const {g,used,per,meta}=plan();
 let h=noteBox();
 const grp=new Map();
-per.forEach(p=>{let x=grp.get(p.o.id); if(!x){x={o:p.o,d:p.d,mk:{},none:true}; grp.set(p.o.id,x)} for(const [n,k] of Object.entries(p.mk)){x.mk[n]=(x.mk[n]||0)+k; x.none=false}});
+per.forEach(p=>{let x=grp.get(p.o.id); if(!x){x={o:p.o,d:p.d,mk:{},ms:{},none:true}; grp.set(p.o.id,x)} for(const [n,k] of Object.entries(p.mk)){x.mk[n]=(x.mk[n]||0)+k; x.none=false} for(const [n,k] of Object.entries(p.ms||{}))x.ms[n]=(x.ms[n]||0)+k;});
 const drafts=S.orders.filter(o=>!o.formed&&cnt(o.items));
 if(per.length){
 h+=`<div class="card"><h3>📋 Заказы</h3>${[...grp.values()].map(x=>{
 const raw=Object.entries(x.mk).filter(([n])=>isRaw(n)).map(([n,k])=>`${n} ×${k}`).join(', ');
-return `<div class="od"><b>${esc(chipLabel(x.o))}</b><span class="sm"> · ${esc(secOf(x.o.sec).name)}</span> <span class="sm">${x.o.kind==='in'?'поступление':(x.none?'✅ хватает склада':'нужно сделать')}</span>${raw?`<div class="sm">🏭 ${raw}</div>`:''}${x.o.kind==='swap'&&x.o.get&&x.o.get.name?`<div class="sm">🎁 Получим: ${esc(x.o.get.name)} ×${x.o.get.qty}</div>`:''}<div>${armF===x.o.id?`<button class="fin mini arm2" data-fin2="${x.o.id}">Да, выполнить</button> <button class="fin mini" data-cancel="1">Отмена</button>`:`<button class="fin mini" data-fin="${x.o.id}">Выполнить</button>`}</div></div>`}).join('')}</div>`;
+return `<div class="od"><b>${esc(chipLabel(x.o))}</b><span class="sm"> · ${esc(secOf(x.o.sec).name)}</span> <span class="sm">${x.o.kind==='in'?'поступление':(Object.keys(x.ms).length?'⚠️ не хватает':(x.none?'✅ хватает склада':'нужно сделать'))}</span>${raw?`<div class="sm">🏭 ${raw}</div>`:''}${Object.keys(x.ms).length?`<div class="sm" style="color:#d33">⚠️ Не хватает: ${Object.entries(x.ms).map(([n,k])=>esc(n)+' ×'+k).join(', ')}</div>`:''}${x.o.kind==='swap'&&x.o.get&&x.o.get.name?`<div class="sm">🎁 Получим: ${esc(x.o.get.name)} ×${x.o.get.qty}</div>`:''}<div>${armF===x.o.id?`<button class="fin mini arm2" data-fin2="${x.o.id}">Да, выполнить</button> <button class="fin mini" data-cancel="1">Отмена</button>`:`<button class="fin mini" data-fin="${x.o.id}">Выполнить</button>`}</div></div>`}).join('')}</div>`;
 }
 if(drafts.length)h+=`<div class="card sm">Не сформированы и не учитываются: ${drafts.map(o=>esc(o.name)).join(', ')}</div>`;
 const anyMake=Object.keys(meta.pri).length>0;
@@ -340,7 +342,7 @@ if(t)h+=`<div class="cf wrap"><span>Такой состав уже есть в �
 }
 if(c.formed){
 const items=Object.entries(c.items).filter(e=>e[1]>0).sort((a,b)=>isRaw(a[0])-isRaw(b[0])||a[0].localeCompare(b[0],'ru'));
-h+=`<div class="card"><h3>Состав заказа${(c.count||1)>1?` · ×${c.count}`:''}</h3>${items.map(([n,k])=>`<div class="it"><span>${n}</span><b>×${k}</b></div>`).join('')}</div>`;
+h+=`<div class="card"><h3>Состав заказа${(c.count||1)>1?` · ×${c.count}`:''}</h3>${items.map(([n,k])=>`<div class="it"><span>${esc(n)}</span><b>×${k}</b></div>`).join('')}</div>`;
 if(c.kind==='swap'&&c.get&&c.get.name)h+=`<div class="card sm">🎁 Получим: ${esc(c.get.name)} ×${c.get.qty}</div>`;
 if(armF===c.id)h+=`<div class="cf"><span>Склад и галочки обновятся</span><button class="arm2" data-fin2="${c.id}">Выполнить</button><button data-cancel="1">Отмена</button></div>`;
 else h+=`<button class="fin" data-fin="${c.id}">Выполнить заказ</button><button class="clr" data-edit="1">Изменить состав</button>`;
@@ -351,11 +353,13 @@ h+=`<button class="fin" data-form="1" ${cnt(c.items)&&(c.kind!=='swap'||(c.get&&
 }
 if(tab==='stock')h+=specBox();
 const obj=tab==='stock'?S.stock:c.items;
+const spec=tab==='orders'?specAll().filter(n=>n.toLowerCase().includes(q)):[];
 const arr=names.filter(n=>n.toLowerCase().includes(q))
 .sort((a,b)=>(tab==='stock'?isRaw(b)-isRaw(a):isRaw(a)-isRaw(b))||a.localeCompare(b,'ru'));
 h+=arr.map(n=>{const v=obj[n]||0,i=names.indexOf(n);
 return `<div class="row${v?' on':''}"><span>${n}</span><span class="st"><button data-i="${i}" data-d="-1">−</button><b>${v}</b>${[1,5,10].map(d=>`<button data-i="${i}" data-d="${d}">+${d}</button>`).join('')}</span></div>`}).join('')
-||'<p class="mut">Ничего не найдено</p>';
+||(spec.length?'':'<p class="mut">Ничего не найдено</p>');
+if(spec.length)h+=`<div class="sh">✨ Особые</div>`+spec.map(n=>{const v=c.items[n]||0,i=specAll().indexOf(n); return `<div class="row${v?' on':''}"><span>${esc(n)}</span><span class="st"><button data-so="${i}" data-d="-1">−</button><b>${v}</b>${[1,5,10].map(d=>`<button data-so="${i}" data-d="${d}">+${d}</button>`).join('')}</span></div>`}).join('');
 h+=(tab==='stock'?stockBox()+backupBox():'')+`<button class="clr" data-clr="1">Очистить ${tab==='orders'?'состав':'склад'}</button>`;
 $main.innerHTML=h;
 }
@@ -499,7 +503,8 @@ else if(names.some(n=>norm(n)===norm(v))||specAll().some(s=>norm(s)===norm(v)))s
 else{S.special.push(v);spErr=''}
 keep(); return}
 if(x=g('data-sd')){const n=specAll()[+x.dataset.si]; const v=Math.max(0,(S.stock[n]||0)+ +x.dataset.sd); if(v)S.stock[n]=v; else delete S.stock[n]; keep(); return}
-if(x=g('data-sdelr')){const n=specAll()[+x.dataset.sdelr]; S.special=S.special.filter(s=>s!==n); delete S.stock[n]; keep(); return}
+if(x=g('data-sdelr')){const n=specAll()[+x.dataset.sdelr]; S.special=S.special.filter(s=>s!==n); delete S.stock[n]; S.orders.forEach(o=>{delete o.items[n]; if(o.get&&o.get.name===n)o.get=null}); keep(); return}
+if(x=g('data-so')){const n=specAll()[+x.dataset.so]; c.items[n]=Math.max(0,(c.items[n]||0)+ +x.dataset.d); keep(); return}
 if(x=g('data-i')){
 const o=tab==='stock'?S.stock:c.items, n=names[+x.dataset.i];
 o[n]=Math.max(0,(o[n]||0)+ +x.dataset.d); keep();
