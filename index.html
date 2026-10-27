@@ -111,7 +111,7 @@ const cnt=o=>Object.values(o).filter(v=>v>0).length;
 const norm=s=>String(s).trim().toLowerCase();
 let S={secs:[{id:1,name:'Общее',p:1}],orders:[{id:1,name:'Заказ 1',sec:1,count:1,formed:false,kind:'out',items:{}}],cur:1,stock:{},done:{},special:[]};
 let hist=[], histAt=-1, histLock=false;
-let tab='orders', q='', armed=0, armF=0, note='', msg='', nameErr='', dup=null, oq='', armS=0, armR=0, armRC=0, planView='stage', bk={msg:'',txt:'',in:''}, spErr='';
+let tab='orders', q='', armed=0, armF=0, note='', msg='', nameErr='', dup=null, oq='', armS=0, armR=0, armRC=0, planView='stage', bk={msg:'',txt:'',in:''}, spErr='', opick='n';
 try{
 const s=JSON.parse(localStorage.getItem('bi')||'null');
 if(s){
@@ -352,14 +352,15 @@ h+=`<div class="cf"><span>Одинаковых заказов</span><span class=
 h+=`<button class="fin" data-form="1" ${cnt(c.items)&&(c.kind!=='swap'||(c.get&&c.get.name))?'':'disabled'}>Сформировать заказ</button>`;
 }
 if(tab==='stock')h+=specBox();
+if(tab==='orders')h+=`<div class="tabs sub"><button data-op="n" class="${opick==='n'?'on':''}">Товары</button><button data-op="s" class="${opick==='s'?'on':''}">✨ Особые${specAll().length?' · '+specAll().length:''}</button></div>`;
 const obj=tab==='stock'?S.stock:c.items;
-const spec=tab==='orders'?specAll().filter(n=>n.toLowerCase().includes(q)):[];
-const arr=names.filter(n=>n.toLowerCase().includes(q))
+const spec=(tab==='orders'&&opick==='s')?specAll().filter(n=>n.toLowerCase().includes(q)):[];
+const arr=(tab==='orders'&&opick==='s')?[]:names.filter(n=>n.toLowerCase().includes(q))
 .sort((a,b)=>(tab==='stock'?isRaw(b)-isRaw(a):isRaw(a)-isRaw(b))||a.localeCompare(b,'ru'));
 h+=arr.map(n=>{const v=obj[n]||0,i=names.indexOf(n);
 return `<div class="row${v?' on':''}"><span>${n}</span><span class="st"><button data-i="${i}" data-d="-1">−</button><b>${v}</b>${[1,5,10].map(d=>`<button data-i="${i}" data-d="${d}">+${d}</button>`).join('')}</span></div>`}).join('')
-||(spec.length?'':'<p class="mut">Ничего не найдено</p>');
-if(spec.length)h+=`<div class="sh">✨ Особые</div>`+spec.map(n=>{const v=c.items[n]||0,i=specAll().indexOf(n); return `<div class="row${v?' on':''}"><span>${esc(n)}</span><span class="st"><button data-so="${i}" data-d="-1">−</button><b>${v}</b>${[1,5,10].map(d=>`<button data-so="${i}" data-d="${d}">+${d}</button>`).join('')}</span></div>`}).join('');
+||(spec.length?'':'<p class="mut">'+((tab==='orders'&&opick==='s'&&!specAll().length)?'Особых ресурсов пока нет: добавь их на вкладке «Склад»':'Ничего не найдено')+'</p>');
+if(spec.length)h+=spec.map(n=>{const v=c.items[n]||0,i=specAll().indexOf(n); return `<div class="row${v?' on':''}"><span>${esc(n)}</span><span class="st"><button data-so="${i}" data-d="-1">−</button><b>${v}</b>${[1,5,10].map(d=>`<button data-so="${i}" data-d="${d}">+${d}</button>`).join('')}</span></div>`}).join('');
 h+=(tab==='stock'?stockBox()+backupBox():'')+`<button class="clr" data-clr="1">Очистить ${tab==='orders'?'состав':'склад'}</button>`;
 $main.innerHTML=h;
 }
@@ -504,6 +505,7 @@ else{S.special.push(v);spErr=''}
 keep(); return}
 if(x=g('data-sd')){const n=specAll()[+x.dataset.si]; const v=Math.max(0,(S.stock[n]||0)+ +x.dataset.sd); if(v)S.stock[n]=v; else delete S.stock[n]; keep(); return}
 if(x=g('data-sdelr')){const n=specAll()[+x.dataset.sdelr]; S.special=S.special.filter(s=>s!==n); delete S.stock[n]; S.orders.forEach(o=>{delete o.items[n]; if(o.get&&o.get.name===n)o.get=null}); keep(); return}
+if(x=g('data-op')){opick=x.dataset.op; render(); return}
 if(x=g('data-so')){const n=specAll()[+x.dataset.so]; c.items[n]=Math.max(0,(c.items[n]||0)+ +x.dataset.d); keep(); return}
 if(x=g('data-i')){
 const o=tab==='stock'?S.stock:c.items, n=names[+x.dataset.i];
